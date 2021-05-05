@@ -6,8 +6,9 @@
 [sub_resource type="ShaderMaterial" id=1]
 shader = ExtResource( 1 )
 shader_param/iTime = null
-shader_param/iCameraPosition = Vector3( 0, 0, -1 )
-shader_param/iCameraLookAt = Vector3( 0, 0, 0 )
+shader_param/iCameraPosition = null
+shader_param/iCameraLookAt = null
+shader_param/iBallPosition = null
 
 [sub_resource type="GDScript" id=2]
 script/source = "extends Button
@@ -22,7 +23,23 @@ func _input(event):
 		_pressed()
 "
 
-[node name="Demo" type="ColorRect"]
+[node name="Spatial" type="Spatial"]
+__meta__ = {
+"_edit_lock_": true
+}
+
+[node name="Camera" type="Position3D" parent="."]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -10 )
+
+[node name="Target" type="Position3D" parent="Camera"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 1 )
+__meta__ = {
+"_edit_lock_": true
+}
+
+[node name="Ball" type="Position3D" parent="."]
+
+[node name="MarchTarget" type="ColorRect" parent="."]
 material = SubResource( 1 )
 anchor_right = 1.0
 anchor_bottom = 1.0
@@ -31,7 +48,7 @@ __meta__ = {
 "_edit_lock_": true
 }
 
-[node name="ReloadButton" type="Button" parent="."]
+[node name="ReloadButton" type="Button" parent="MarchTarget"]
 margin_left = 16.0
 margin_top = 16.0
 text = "Reload shader"

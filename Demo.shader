@@ -1,8 +1,9 @@
 shader_type canvas_item;
 
 uniform float iTime;
-uniform vec3 iCameraPosition = vec3(0, 0, -1);
-uniform vec3 iCameraLookAt = vec3(0, 0, 0);
+uniform vec3 iCameraPosition;
+uniform vec3 iCameraLookAt;
+uniform vec3 iBallPosition;
 
 float sdSphere(vec3 p, float r)
 {
@@ -11,7 +12,7 @@ float sdSphere(vec3 p, float r)
 
 float sdf(vec3 pos)
 {
-	float t = sdSphere(pos - vec3(0.0, 0.0, 10.0), 3.0);
+	float t = sdSphere(pos - iBallPosition, 3.0);
 
 	return t;
 }
