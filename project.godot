@@ -8,6 +8,16 @@
 
 config_version=4
 
+_global_script_classes=[ {
+"base": "ColorRect",
+"class": "Demo",
+"language": "GDScript",
+"path": "res://Demo.gd"
+} ]
+_global_script_class_icons={
+"Demo": ""
+}
+
 [application]
 
 config/name="glöp"
