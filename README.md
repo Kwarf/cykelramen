@@ -3,7 +3,7 @@
 - [x] Ramen
 - [x] Flerfärg
 - [x] Skuggor
-- [ ] Skålen
+- [x] Skålen
 - [ ] Underlägget
 - [ ] Fysiken (precalc)
 - [ ] Tunneln

@@ -16,6 +16,11 @@ float fOpUnionRound(float a, float b, float r)
 	return max(r, min (a, b)) - length(u);
 }
 
+vec2 opRevolution(vec3 p, float w)
+{
+    return vec2(length(p.xz) - w, p.y);
+}
+
 float opExtrusion(vec3 p, float sdf, float h)
 {
 	float hh = h / 2.0;
@@ -33,16 +38,39 @@ float sdPlane(vec3 p, vec3 n, float h)
 	return dot(p,n) + h;
 }
 
+// 2D primitives
+
 float sdCircle(vec2 p, float r)
 {
 	return length(p) - r;
 }
+
+float sdRoundBox(vec2 p, vec2 b, vec4 r) 
+{
+    r.xy = (p.x>0.0)?r.xy : r.zw;
+    r.x  = (p.y>0.0)?r.x  : r.y;
+    
+    vec2 q = abs(p)-b+r.x;
+    return min(max(q.x,q.y),0.0) + length(max(q,0.0)) - r.x;
+}
+
+float sdArc(vec2 p, vec2 sca, vec2 scb, float ra, float rb)
+{
+	p *= mat2(vec2(sca.x,sca.y),vec2(-sca.y,sca.x));
+	p.x = abs(p.x);
+	float k = (scb.y*p.x>scb.x*p.y) ? dot(p,scb) : length(p);
+	return sqrt( dot(p,p) + ra*ra - 2.0*ra*k ) - rb;
+}
+
+// 3D primitives
 
 float sdBox(vec3 p, vec3 b)
 {
 	vec3 q = abs(p) - b;
 	return length(max(q,0.0)) + min(max(q.x,max(q.y,q.z)),0.0);
 }
+
+// 3D primitives (custom)
 
 float sdTube(vec3 p, float d, float t, float h)
 {
@@ -55,6 +83,8 @@ float sdCylinder(vec3 p, vec2 h)
 	vec2 d = abs(vec2(length(p.xz),p.y)) - h;
 	return min(max(d.x,d.y),0.0) + length(max(d,0.0));
 }
+
+// 3D models
 
 float sdSubFrame(vec3 pos)
 {
@@ -83,6 +113,7 @@ float sdSubFrame(vec3 pos)
 float sdBikeFrame(vec3 pos)
 {
 	float t = 1e10;
+	pos += vec3(0.0, -0.035, 0.0);
 	// Bounding box culling. Worth it? Who knows. Increased FPS from ~420 to ~640 when the frame took up maybe 1/10th of the frame.
 	vec3 p = pos + vec3(0.12, -0.24, 0.0);
 	if (sdBox(p, vec3(0.55, 0.28, 0.06)) < t)
@@ -121,17 +152,31 @@ float sdBikeFrame(vec3 pos)
 	return t;
 }
 
+float sdBowl(vec3 pos)
+{
+	vec2 opR = opRevolution(pos + vec3(0.0, -0.74, 0.0), 0.2);
+	float ta = 3.14*1.5;
+    float tb = 3.14*0.5;
+	float t = sdArc(opR, vec2(sin(ta),cos(ta)), vec2(sin(tb),cos(tb)), 0.7, 0.05);
+    t = min(t, sdRoundBox(opR+vec2(0.0, 0.7), vec2(0.35, 0.05), vec4(0.0, 0.03, 0.0, 0.03)));
+	return max(-sdCircle(opR+vec2(0.0, 2.2), 1.5), t);
+}
+
 vec4 scene(vec3 pos)
 {
 	// Floor plane
-	vec4 p = vec4(0.6, 0.6, 0.6, sdPlane(pos, vec3(0.0, 1.0, 0.0), 0.1));
+	vec4 ground = vec4(0.6, 0.6, 0.6, sdPlane(pos, vec3(0.0, 1.0, 0.0), 0.0));
 
 	// Bikes
-	float b1 = sdBikeFrame(pos);
-	float b2 = sdBikeFrame(pos + vec3(0.0, 0.0, -0.2));
-	vec4 b = vec4(0.2, 0.9, 0.9, min(b1, b2));
+	vec3 pos_bikes = pos + vec3(0.0, -0.3, 0.0);
+	float b1 = sdBikeFrame(pos_bikes);
+	float b2 = sdBikeFrame(pos_bikes + vec3(0.0, 0.0, -0.2));
+	vec4 bikes = vec4(0.2, 0.9, 0.9, min(b1, b2));
 
-	return opMinColored(p, b);
+	// Bowl
+	vec4 bowl = vec4(0.9, 0.9, 0.9, sdBowl(pos));
+
+	return opMinColored(ground, opMinColored(bowl, bikes));
 }
 
 vec4 march(vec3 origin, vec3 direction)

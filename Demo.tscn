@@ -6,6 +6,8 @@
 [sub_resource type="ShaderMaterial" id=1]
 shader = ExtResource( 1 )
 shader_param/iTime = null
+shader_param/iCameraPosition = null
+shader_param/iCameraLookAt = null
 shader_param/iBallPosition = null
 
 [sub_resource type="GDScript" id=2]
@@ -27,7 +29,7 @@ __meta__ = {
 }
 
 [node name="Camera" type="Position3D" parent="."]
-transform = Transform( 1, 0, 0, 0, 0.938992, -0.343938, 0, 0.343938, 0.938992, 0, 1, -1 )
+transform = Transform( 1, 0, 0, 0, 0.935043, -0.354536, 0, 0.354536, 0.935043, 0, 1.52079, -2.35655 )
 
 [node name="Target" type="Position3D" parent="Camera"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 1 )
@@ -36,7 +38,7 @@ __meta__ = {
 }
 
 [node name="Ball" type="Position3D" parent="."]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -4.26354, 1.66468, 7.00894 )
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 1.94783, 1.66541, -3.26705 )
 
 [node name="MarchTarget" type="ColorRect" parent="."]
 material = SubResource( 1 )
