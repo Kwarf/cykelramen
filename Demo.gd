@@ -13,7 +13,7 @@ func elapsed() -> float:
 func invX(vec: Vector3) -> Vector3:
 	return vec * Vector3(-1, 1, 1)
 
-func _process(delta: float) -> void:
+func _process(_delta: float) -> void:
 	self.material.set_shader_param("iTime", elapsed());
 	self.material.set_shader_param("iCameraPosition", invX(camera.global_transform.origin));
 	self.material.set_shader_param("iCameraLookAt", invX(camera_target.global_transform.origin));
