@@ -5,6 +5,14 @@ uniform vec3 iCameraPosition;
 uniform vec3 iCameraLookAt;
 uniform vec3 iBallPosition;
 
+vec3 rgb(int r, int g, int b)
+{
+	return vec3(float(r) / 255.0
+		, float(g) / 255.0
+		, float(b) / 255.0
+	);
+}
+
 void pR(inout vec2 p, float a)
 {
 	p = cos(a)*p + sin(a)*vec2(p.y, -p.x);
@@ -18,7 +26,7 @@ float fOpUnionRound(float a, float b, float r)
 
 vec2 opRevolution(vec3 p, float w)
 {
-    return vec2(length(p.xz) - w, p.y);
+	return vec2(length(p.xz) - w, p.y);
 }
 
 float opExtrusion(vec3 p, float sdf, float h)
@@ -33,9 +41,9 @@ vec4 opMinColored(vec4 a, vec4 b)
 	return a.w < b.w ? a : b;
 }
 
-float sdPlane(vec3 p, vec3 n, float h)
+vec3 opRepLim(vec3 p, float c, vec3 l)
 {
-	return dot(p,n) + h;
+	return p-c*clamp(round(p/c),-l,l);
 }
 
 // 2D primitives
@@ -45,13 +53,12 @@ float sdCircle(vec2 p, float r)
 	return length(p) - r;
 }
 
-float sdRoundBox(vec2 p, vec2 b, vec4 r) 
+float sdRoundRect(vec2 p, vec2 b, vec4 r)
 {
-    r.xy = (p.x>0.0)?r.xy : r.zw;
-    r.x  = (p.y>0.0)?r.x  : r.y;
-    
-    vec2 q = abs(p)-b+r.x;
-    return min(max(q.x,q.y),0.0) + length(max(q,0.0)) - r.x;
+	r.xy = (p.x>0.0)?r.xy : r.zw;
+	r.x  = (p.y>0.0)?r.x  : r.y;
+	vec2 q = abs(p)-b+r.x;
+	return min(max(q.x,q.y),0.0) + length(max(q,0.0)) - r.x;
 }
 
 float sdArc(vec2 p, vec2 sca, vec2 scb, float ra, float rb)
@@ -64,10 +71,21 @@ float sdArc(vec2 p, vec2 sca, vec2 scb, float ra, float rb)
 
 // 3D primitives
 
+float sdPlane(vec3 p, vec3 n, float h)
+{
+	return dot(p,n) + h;
+}
+
 float sdBox(vec3 p, vec3 b)
 {
 	vec3 q = abs(p) - b;
 	return length(max(q,0.0)) + min(max(q.x,max(q.y,q.z)),0.0);
+}
+
+float sdRoundBox(vec3 p, vec3 b, float r)
+{
+	vec3 q = abs(p) - b;
+	return length(max(q,0.0)) + min(max(q.x,max(q.y,q.z)),0.0) - r;
 }
 
 // 3D primitives (custom)
@@ -156,10 +174,23 @@ float sdBowl(vec3 pos)
 {
 	vec2 opR = opRevolution(pos + vec3(0.0, -0.74, 0.0), 0.2);
 	float ta = 3.14*1.5;
-    float tb = 3.14*0.5;
+	float tb = 3.14*0.5;
 	float t = sdArc(opR, vec2(sin(ta),cos(ta)), vec2(sin(tb),cos(tb)), 0.7, 0.05);
-    t = min(t, sdRoundBox(opR+vec2(0.0, 0.7), vec2(0.35, 0.05), vec4(0.0, 0.03, 0.0, 0.03)));
+	t = min(t, sdRoundRect(opR+vec2(0.0, 0.7), vec2(0.35, 0.05), vec4(0.0, 0.03, 0.0, 0.03)));
 	return max(-sdCircle(opR+vec2(0.0, 2.2), 1.5), t);
+}
+
+vec4 sdTableMat(vec3 pos)
+{
+	vec3 p = pos + vec3(0.0, -0.02, 0.0);
+	p = opRepLim(p, 0.05, vec3(35.0, 0.0, 0.0));
+	vec4 pins = vec4(rgb(160, 82, 45), sdRoundBox(p, vec3(0.01, 0.01, 1.3), 0.01));
+
+	p = pos + vec3(0.0, -0.03, 0.0);
+	p = opRepLim(p, 0.62, vec3(0.0, 0.0, 2.0));
+	vec4 ropes = vec4(rgb(245, 222, 179), sdRoundBox(p, vec3(1.77, 0.01, 0.01), 0.01));
+
+	return opMinColored(pins, ropes);
 }
 
 vec4 scene(vec3 pos)
@@ -176,7 +207,10 @@ vec4 scene(vec3 pos)
 	// Bowl
 	vec4 bowl = vec4(0.9, 0.9, 0.9, sdBowl(pos));
 
-	return opMinColored(ground, opMinColored(bowl, bikes));
+	// Table mat
+	vec4 mat = sdTableMat(pos);
+
+	return opMinColored(opMinColored(ground, mat), opMinColored(bowl, bikes));
 }
 
 vec4 march(vec3 origin, vec3 direction)

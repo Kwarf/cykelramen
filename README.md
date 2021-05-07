@@ -4,6 +4,6 @@
 - [x] Flerfärg
 - [x] Skuggor
 - [x] Skålen
-- [ ] Underlägget
+- [x] Underlägget
 - [ ] Fysiken (precalc)
 - [ ] Tunneln
