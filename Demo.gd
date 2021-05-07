@@ -5,6 +5,7 @@ onready var time_start: int = OS.get_ticks_usec()
 onready var camera: Spatial = get_parent().find_node("Camera")
 onready var camera_target: Spatial = camera.find_node("Target")
 onready var ball: Spatial = get_parent().find_node("Ball")
+onready var bike: Spatial = get_parent().find_node("Bike")
 
 func elapsed() -> float:
 	return (OS.get_ticks_usec() - time_start) / 1000000.0;
@@ -18,3 +19,5 @@ func _process(_delta: float) -> void:
 	self.material.set_shader_param("iCameraPosition", invX(camera.global_transform.origin));
 	self.material.set_shader_param("iCameraLookAt", invX(camera_target.global_transform.origin));
 	self.material.set_shader_param("iBallPosition", invX(ball.global_transform.origin));
+	self.material.set_shader_param("iBikePosition", invX(bike.global_transform.origin));
+	self.material.set_shader_param("iBikeMat", bike.global_transform.basis);

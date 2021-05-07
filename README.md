@@ -5,5 +5,6 @@
 - [x] Skuggor
 - [x] Skålen
 - [x] Underlägget
-- [ ] Fysiken (precalc)
+- [x] Fysiken
+- [ ] Precalc
 - [ ] Tunneln

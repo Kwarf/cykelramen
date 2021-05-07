@@ -4,6 +4,8 @@ uniform float iTime;
 uniform vec3 iCameraPosition;
 uniform vec3 iCameraLookAt;
 uniform vec3 iBallPosition;
+uniform vec3 iBikePosition;
+uniform mat3 iBikeMat;
 
 vec3 rgb(int r, int g, int b)
 {
@@ -199,16 +201,22 @@ vec4 scene(vec3 pos)
 	vec4 ground = vec4(0.6, 0.6, 0.6, sdPlane(pos, vec3(0.0, 1.0, 0.0), 0.0));
 
 	// Bikes
-	vec3 pos_bikes = pos + vec3(0.0, -0.3, 0.0);
-	float b1 = sdBikeFrame(pos_bikes);
-	float b2 = sdBikeFrame(pos_bikes + vec3(0.0, 0.0, -0.2));
-	vec4 bikes = vec4(0.2, 0.9, 0.9, min(b1, b2));
+	// vec3 pos_bikes = pos + vec3(0.0, -0.3, 0.0);
+	// float b1 = sdBikeFrame(pos_bikes);
+	// float b2 = sdBikeFrame(pos_bikes + vec3(0.0, 0.0, -0.2));
+	// vec4 bikes = vec4(0.2, 0.9, 0.9, min(b1, b2));
+	vec4 bikes = vec4(0.2, 0.9, 0.9, sdBikeFrame(iBikeMat * (pos - iBikePosition)));
 
 	// Bowl
 	vec4 bowl = vec4(0.9, 0.9, 0.9, sdBowl(pos));
 
 	// Table mat
 	vec4 mat = sdTableMat(pos);
+
+	// Shiz
+	// vec3 asd = iBikeMat * (pos + vec3(0.12, -0.24, 0.0) + vec3(0.0, -0.035, -0.044) - iBikePosition);
+	// vec4 shiz = vec4(1.0, 0.0, 0.0, sdBox(asd, vec3(0.55, 0.28, 0.06)));
+	// mat = opMinColored(shiz, mat);
 
 	return opMinColored(opMinColored(ground, mat), opMinColored(bowl, bikes));
 }

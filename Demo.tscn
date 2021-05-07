@@ -1,16 +1,23 @@
-[gd_scene load_steps=5 format=2]
+[gd_scene load_steps=8 format=2]
 
 [ext_resource path="res://Demo.shader" type="Shader" id=1]
 [ext_resource path="res://Demo.gd" type="Script" id=2]
+[ext_resource path="res://BikeCollider.tscn" type="PackedScene" id=3]
+[ext_resource path="res://BowlCollider.tscn" type="PackedScene" id=4]
 
-[sub_resource type="ShaderMaterial" id=1]
+[sub_resource type="BoxShape" id=1]
+extents = Vector3( 100, 1, 100 )
+
+[sub_resource type="ShaderMaterial" id=2]
 shader = ExtResource( 1 )
 shader_param/iTime = null
 shader_param/iCameraPosition = null
 shader_param/iCameraLookAt = null
 shader_param/iBallPosition = null
+shader_param/iBikePosition = null
+shader_param/iBikeMat = null
 
-[sub_resource type="GDScript" id=2]
+[sub_resource type="GDScript" id=3]
 script/source = "extends Button
 
 func _pressed():
@@ -29,7 +36,7 @@ __meta__ = {
 }
 
 [node name="Camera" type="Position3D" parent="."]
-transform = Transform( 0.918105, -0.122333, 0.376985, 0.345103, 0.714497, -0.608603, -0.194903, 0.68886, 0.698201, -1.79653, 2.33361, -2.5741 )
+transform = Transform( 1, 0, 0, 0, 0.904597, -0.426269, 0, 0.426269, 0.904597, 0, 3.05712, -2.59117 )
 
 [node name="Target" type="Position3D" parent="Camera"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 1 )
@@ -40,8 +47,20 @@ __meta__ = {
 [node name="Ball" type="Position3D" parent="."]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 1.94783, 1.66541, -3.26705 )
 
+[node name="Table" type="StaticBody" parent="."]
+
+[node name="CollisionShape" type="CollisionShape" parent="Table"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -1, 0 )
+shape = SubResource( 1 )
+
+[node name="Bowl" parent="." instance=ExtResource( 4 )]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.1, 0 )
+
+[node name="Bike" parent="." instance=ExtResource( 3 )]
+transform = Transform( 1, 0, 0, 0, 0.963102, 0.269138, 0, -0.269138, 0.963102, 0.232698, 3, 0 )
+
 [node name="MarchTarget" type="ColorRect" parent="."]
-material = SubResource( 1 )
+material = SubResource( 2 )
 anchor_right = 1.0
 anchor_bottom = 1.0
 script = ExtResource( 2 )
@@ -53,7 +72,7 @@ __meta__ = {
 margin_left = 16.0
 margin_top = 16.0
 text = "Reload shader"
-script = SubResource( 2 )
+script = SubResource( 3 )
 __meta__ = {
 "_edit_use_anchors_": false
 }
