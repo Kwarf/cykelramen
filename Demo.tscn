@@ -50,7 +50,7 @@ __meta__ = {
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -2.38419e-07, 2.38419e-07 )
 
 [node name="Camera" type="Position3D" parent="."]
-transform = Transform( 1, 0, 0, 0, 0.932153, -0.362064, 0, 0.362064, 0.932153, 0, 3.05, -4.25533 )
+transform = Transform( 0.818551, 0.207982, 0.53546, 0, 0.932153, -0.362064, -0.574434, 0.296368, 0.763015, -2.66011, 3.05, -3.3453 )
 
 [node name="Target" type="Position3D" parent="Camera"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 1 )

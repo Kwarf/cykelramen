@@ -196,32 +196,40 @@ vec4 sdTableMat(vec3 pos)
 
 vec4 scene(vec3 pos)
 {
-	// Floor plane
-	vec4 ground = vec4(0.6, 0.6, 0.6, sdPlane(pos, vec3(0.0, 1.0, 0.0), 0.0));
+	// Table
+	vec4 obj = vec4(0.2, 0.2, 0.2, sdRoundBox(pos+vec3(0.0, 0.08, 0.0), vec3(10.0, 0.03, 1.4), 0.05));
+	obj = opMinColored(obj, vec4(0.2, 0.2, 0.4, sdRoundBox(pos-vec3(0.0, 1.5, 1.5), vec3(10.0, 3.0, 0.03), 0.05)));
+	obj = opMinColored(obj, vec4(0.4, 0.2, 0.2, sdRoundBox(pos-vec3(0.0, 2.5, 1.3), vec3(10.0, 0.7, 0.03), 0.05)));
+	obj = opMinColored(obj, vec4(0.8, 0.8, 1.0, sdRoundBox(pos-vec3(0.0, 2.5, 0.3), vec3(0.7, 0.6, 1.0), 0.1)));
 
 	// Bikes
-	float dBikes = 1e10;
-	float precalcWidth = float(textureSize(iPrecalcTexture, 0).x);
-	for (int i = 0; i < 5; i++)
+	if (sdBox(pos-vec3(0.0, 0.95, 0.0), vec3(1.0, 0.9, 1.0)) < 1e10) // 111 -> 134 FPS (540p)
 	{
-		float offs = float(i) * 4.0;
-		vec3 bikePosition = texture(iPrecalcTexture, vec2(offs / precalcWidth, iTime / 3.0)).xyz;
-		mat3 bikeTranslation = mat3(
-			  texture(iPrecalcTexture, vec2((offs + 1.0) / precalcWidth, iTime / 3.0)).xyz
-			, texture(iPrecalcTexture, vec2((offs + 2.0) / precalcWidth, iTime / 3.0)).xyz
-			, texture(iPrecalcTexture, vec2((offs + 3.0) / precalcWidth, iTime / 3.0)).xyz
-		);
-		dBikes = min(dBikes, sdBikeFrame(bikeTranslation * (pos - bikePosition)));
+		float dBikes = 1e10;
+		float precalcWidth = float(textureSize(iPrecalcTexture, 0).x);
+		for (int i = 0; i < 5; i++)
+		{
+			float offs = float(i) * 4.0;
+			vec3 bikePosition = texture(iPrecalcTexture, vec2(offs / precalcWidth, iTime / 3.0)).xyz;
+			mat3 bikeTranslation = mat3(
+				texture(iPrecalcTexture, vec2((offs + 1.0) / precalcWidth, iTime / 3.0)).xyz
+				, texture(iPrecalcTexture, vec2((offs + 2.0) / precalcWidth, iTime / 3.0)).xyz
+				, texture(iPrecalcTexture, vec2((offs + 3.0) / precalcWidth, iTime / 3.0)).xyz
+			);
+			dBikes = min(dBikes, sdBikeFrame(bikeTranslation * (pos - bikePosition)));
+		}
+
+		// Cut / clip / w/e
+		dBikes = max(-sdBox(pos-vec3(0.0, 7.8, 0.3), vec3(2.0, 6.0, 2.0)), dBikes);
+
+		obj = opMinColored(obj, vec4(0.2, 0.9, 0.9, dBikes));
 	}
-	vec4 cBikes = vec4(0.2, 0.9, 0.9, dBikes);
 
 	// Bowl
-	vec4 bowl = vec4(0.9, 0.9, 0.9, sdBowl(pos));
+	obj = opMinColored(obj, vec4(0.9, 0.9, 0.9, sdBowl(pos)));
 
 	// Table mat
-	vec4 mat = sdTableMat(pos);
-
-	return opMinColored(opMinColored(ground, mat), opMinColored(bowl, cBikes));
+	return opMinColored(obj, sdTableMat(pos));
 }
 
 vec4 march(vec3 origin, vec3 direction)
