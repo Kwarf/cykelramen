@@ -6,5 +6,6 @@
 - [x] Skålen
 - [x] Underlägget
 - [x] Fysiken
-- [ ] Precalc
+- [x] Precalc
+- [ ] Pinnar
 - [ ] Tunneln

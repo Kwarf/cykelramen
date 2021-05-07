@@ -1,0 +1,94 @@
+[gd_scene load_steps=9 format=2]
+
+[ext_resource path="res://BowlCollider.tscn" type="PackedScene" id=1]
+[ext_resource path="res://BikeCollider.tscn" type="PackedScene" id=2]
+[ext_resource path="res://Precalc.gd" type="Script" id=3]
+[ext_resource path="res://assets/GohuFont-Bold.ttf" type="DynamicFontData" id=4]
+
+[sub_resource type="StyleBoxFlat" id=1]
+bg_color = Color( 0, 0, 0, 1 )
+
+[sub_resource type="StyleBoxFlat" id=2]
+bg_color = Color( 1, 1, 1, 1 )
+corner_detail = 1
+expand_margin_left = 4.0
+expand_margin_right = 4.0
+expand_margin_top = 4.0
+expand_margin_bottom = 4.0
+
+[sub_resource type="DynamicFont" id=3]
+size = 14
+font_data = ExtResource( 4 )
+
+[sub_resource type="BoxShape" id=4]
+extents = Vector3( 100, 1, 100 )
+
+[node name="Precalc" type="Spatial"]
+pause_mode = 2
+script = ExtResource( 3 )
+
+[node name="ColorRect" type="ColorRect" parent="."]
+anchor_right = 1.0
+anchor_bottom = 1.0
+color = Color( 0, 0, 0, 1 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="ProgressBar" type="ProgressBar" parent="ColorRect"]
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+margin_left = -93.0
+margin_top = -15.5
+margin_right = 93.0
+margin_bottom = 15.5
+custom_styles/fg = SubResource( 1 )
+custom_styles/bg = SubResource( 2 )
+value = 100.0
+percent_visible = false
+__meta__ = {
+"_edit_lock_": true,
+"_edit_use_anchors_": false
+}
+
+[node name="Label" type="Label" parent="ColorRect/ProgressBar"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+custom_fonts/font = SubResource( 3 )
+text = "TOTALLY REAL PRECALC"
+align = 1
+valign = 1
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Bikes" type="Spatial" parent="."]
+
+[node name="Bike1" parent="Bikes" instance=ExtResource( 2 )]
+transform = Transform( 0.80167, -0.516402, 0.301087, 0.590883, 0.608357, -0.529867, 0.0904559, 0.602686, 0.792835, 0.181269, 9.29781, -0.445816 )
+
+[node name="Bike2" parent="Bikes" instance=ExtResource( 2 )]
+transform = Transform( 0.971599, 0, -0.236635, -0.174752, 0.674264, -0.717517, 0.159554, 0.738491, 0.655114, 0.331095, 9, 0.3 )
+
+[node name="Bike3" parent="Bikes" instance=ExtResource( 2 )]
+transform = Transform( 0.95118, -0.164929, 0.260873, 0.0587608, -0.73301, -0.677675, 0.302991, 0.65992, -0.687533, 0, 8.62856, 0 )
+
+[node name="Bike4" parent="Bikes" instance=ExtResource( 2 )]
+transform = Transform( 0.347402, 0.201013, 0.915918, 0.419005, 0.840543, -0.343397, -0.838896, 0.503072, 0.207781, -0.077844, 7.50705, -0.3 )
+
+[node name="Bike5" parent="Bikes" instance=ExtResource( 2 )]
+transform = Transform( -0.890644, -0.36158, 0.275705, -0.194814, 0.851315, 0.487145, -0.410854, 0.380161, -0.82866, -0.380039, 7.4855, 0.3 )
+
+[node name="Bowl" parent="." instance=ExtResource( 1 )]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.183522, 0 )
+
+[node name="Table" type="StaticBody" parent="."]
+
+[node name="CollisionShape" type="CollisionShape" parent="Table"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -1, 0 )
+shape = SubResource( 4 )
+
+[node name="NotACameraPlease" type="Camera" parent="."]
+transform = Transform( 1, 0, 0, 0, 0.925044, 0.37986, 0, -0.37986, 0.925044, 0, 2.4386, 2.87427 )
