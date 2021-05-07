@@ -2,7 +2,7 @@
 
 - [x] Ramen
 - [x] Flerfärg
-- [ ] Skuggor
+- [x] Skuggor
 - [ ] Skålen
 - [ ] Underlägget
 - [ ] Fysiken (precalc)

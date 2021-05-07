@@ -124,29 +124,31 @@ float sdBikeFrame(vec3 pos)
 vec4 scene(vec3 pos)
 {
 	// Floor plane
-	vec4 p = vec4(0.6, 0.6, 0.6, sdPlane(pos, vec3(0.0, 1.0, 0.0), 1.0));
+	vec4 p = vec4(0.6, 0.6, 0.6, sdPlane(pos, vec3(0.0, 1.0, 0.0), 0.1));
 
-	// Bike
-	vec4 b = vec4(0.2, 0.9, 0.9, sdBikeFrame(pos));
+	// Bikes
+	float b1 = sdBikeFrame(pos);
+	float b2 = sdBikeFrame(pos + vec3(0.0, 0.0, -0.2));
+	vec4 b = vec4(0.2, 0.9, 0.9, min(b1, b2));
 
 	return opMinColored(p, b);
 }
 
 vec4 march(vec3 origin, vec3 direction)
 {
-	vec4 t = vec4(1.0, 1.0, 1.0, -1.0);
+	float t = 0.0;
 
 	for (int i = 0; i < 128; i++)
 	{
-		vec4 res = scene(origin + direction * t.w);
-		if (res.w < (0.0001 * t.w))
+		vec4 res = scene(origin + direction * t);
+		if (res.w < (0.0001 * t))
 		{
-			return vec4(res.rgb, t.w);
+			return vec4(res.rgb, t);
 		}
-		t.w += res.w;
+		t += res.w;
 	}
 
-	return t;
+	return vec4(-1.0);
 }
 
 vec3 getNormal(vec3 pos)
@@ -161,31 +163,31 @@ vec3 render(vec3 rayOrigin, vec3 rayDirection)
 	vec3 color = vec3(1, 1, 1);
 	vec4 t = march(rayOrigin, rayDirection);
 
-	vec3 L = normalize(vec3(sin(iTime)*1.0, cos(iTime*0.5)+2.0, -0.5));
+	vec3 L = normalize(iBallPosition);
 
-	if (t.w > -1.0)
+	if (t.w == -1.0)
+	{
+		// Miss color
+		color = vec3(0.9, 0.9, 1.0);
+	}
+	else
 	{
 		vec3 pos = rayOrigin + rayDirection * t.w;
 		vec3 N = getNormal(pos);
 
-		vec3 objectSurfaceColour = t.rgb;
-		// L is vector from surface point to light, N is surface normal. N and L must be normalized!
 		float NoL = max(dot(N, L), 0.0);
 		vec3 LDirectional = vec3(1.0,1.0,1.0) * NoL;
-		vec3 LAmbient = vec3(0.1, 0.1, 0.1);
-		vec3 diffuse = objectSurfaceColour * (LDirectional + LAmbient);
-
-		color = diffuse;
+		vec3 LAmbient = vec3(0.1,0.1,0.1);
+		color = t.rgb * (LDirectional + LAmbient);
 
 		float shadow = 0.0;
 		vec3 shadowRayOrigin = pos + N * 0.01;
 		vec3 shadowRayDir = L;
-		t = march(shadowRayOrigin, shadowRayDir);
-		if (t.w >= -1.0)
+		if (march(shadowRayOrigin, shadowRayDir).w > -1.0)
 		{
 			shadow = 1.0;
 		}
-		color = mix(color, color*0.8, shadow);
+		color = mix(color, color*0.3, shadow);
 	}
 
 	return color;
@@ -211,5 +213,5 @@ void fragment()
 	vec2 uv = normalizeScreenCoords(1.0 / SCREEN_PIXEL_SIZE, FRAGCOORD.xy);
 	vec3 rayDirection = getCameraRayDirection(uv);
 	vec3 col = render(iCameraPosition, rayDirection);
-	COLOR = vec4(col, 1);
+	COLOR = vec4(pow(col, vec3(0.4545)), 1);
 }
