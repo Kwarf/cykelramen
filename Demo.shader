@@ -23,6 +23,11 @@ float opExtrusion(vec3 p, float sdf, float h)
 	return min(max(w.x,w.y),0.0) + length(max(w,0.0));
 }
 
+vec4 opMinColored(vec4 a, vec4 b)
+{
+	return a.w < b.w ? a : b;
+}
+
 float sdPlane(vec3 p, vec3 n, float h)
 {
 	return dot(p,n) + h;
@@ -116,58 +121,58 @@ float sdBikeFrame(vec3 pos)
 	return t;
 }
 
-float sdf(vec3 pos)
+vec4 scene(vec3 pos)
 {
 	// Floor plane
-	float t = sdPlane(pos, vec3(0.0, 1.0, 0.0), 1.0);
+	vec4 p = vec4(0.6, 0.6, 0.6, sdPlane(pos, vec3(0.0, 1.0, 0.0), 1.0));
 
 	// Bike
-	t = min(t, sdBikeFrame(pos));
+	vec4 b = vec4(0.2, 0.9, 0.9, sdBikeFrame(pos));
+
+	return opMinColored(p, b);
+}
+
+vec4 march(vec3 origin, vec3 direction)
+{
+	vec4 t = vec4(1.0, 1.0, 1.0, -1.0);
+
+	for (int i = 0; i < 128; i++)
+	{
+		vec4 res = scene(origin + direction * t.w);
+		if (res.w < (0.0001 * t.w))
+		{
+			return vec4(res.rgb, t.w);
+		}
+		t.w += res.w;
+	}
 
 	return t;
 }
 
-float march(vec3 origin, vec3 direction)
-{
-	float t = 0.0;
-
-	for (int i = 0; i < 128; i++)
-	{
-		float res = sdf(origin + direction * t);
-		if (res < (0.0001 * t))
-		{
-			return t;
-		}
-		t += res;
-	}
-
-	return -1.0;
-}
-
 vec3 getNormal(vec3 pos)
 {
-	float c = sdf(pos);
+	float c = scene(pos).w;
 	vec2 epsZero = vec2(0.001, 0.0);
-	return normalize(vec3(sdf(pos + epsZero.xyy), sdf(pos + epsZero.yxy), sdf(pos + epsZero.yyx)) - c);
+	return normalize(vec3(scene(pos + epsZero.xyy).w, scene(pos + epsZero.yxy).w, scene(pos + epsZero.yyx).w) - c);
 }
 
 vec3 render(vec3 rayOrigin, vec3 rayDirection)
 {
 	vec3 color = vec3(1, 1, 1);
-	float t = march(rayOrigin, rayDirection);
+	vec4 t = march(rayOrigin, rayDirection);
 
 	vec3 L = normalize(vec3(sin(iTime)*1.0, cos(iTime*0.5)+2.0, -0.5));
 
-	if (t > -1.0)
+	if (t.w > -1.0)
 	{
-		vec3 pos = rayOrigin + rayDirection * t;
+		vec3 pos = rayOrigin + rayDirection * t.w;
 		vec3 N = getNormal(pos);
 
-		vec3 objectSurfaceColour = vec3(0.4, 0.8, 0.1);
+		vec3 objectSurfaceColour = t.rgb;
 		// L is vector from surface point to light, N is surface normal. N and L must be normalized!
 		float NoL = max(dot(N, L), 0.0);
-		vec3 LDirectional = vec3(1.80,1.27,0.99) * NoL;
-		vec3 LAmbient = vec3(0.03, 0.04, 0.1);
+		vec3 LDirectional = vec3(1.0,1.0,1.0) * NoL;
+		vec3 LAmbient = vec3(0.1, 0.1, 0.1);
 		vec3 diffuse = objectSurfaceColour * (LDirectional + LAmbient);
 
 		color = diffuse;
@@ -176,7 +181,7 @@ vec3 render(vec3 rayOrigin, vec3 rayDirection)
 		vec3 shadowRayOrigin = pos + N * 0.01;
 		vec3 shadowRayDir = L;
 		t = march(shadowRayOrigin, shadowRayDir);
-		if (t >= -1.0)
+		if (t.w >= -1.0)
 		{
 			shadow = 1.0;
 		}
