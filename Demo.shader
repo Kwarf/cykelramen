@@ -194,6 +194,15 @@ vec4 sdTableMat(vec3 pos)
 	return opMinColored(pins, ropes);
 }
 
+float sdChopsticks(vec3 pos)
+{
+	vec3 p = pos;
+	pR(p.yz, radians(90));
+	float t = sdCylinder(p, vec2(0.02, 0.8));
+	t = fOpUnionRound(t, sdBox(pos - vec3(0.0, 0.0, 0.9), vec3(0.024, 0.024, 0.15)), 0.015);
+	return t;
+}
+
 vec4 scene(vec3 pos)
 {
 	// Table
@@ -203,30 +212,35 @@ vec4 scene(vec3 pos)
 	obj = opMinColored(obj, vec4(0.8, 0.8, 1.0, sdRoundBox(pos-vec3(0.0, 2.5, 0.3), vec3(0.7, 0.6, 1.0), 0.1)));
 
 	// Bikes
-	if (sdBox(pos-vec3(0.0, 0.95, 0.0), vec3(1.0, 0.9, 1.0)) < 1e10) // 111 -> 134 FPS (540p)
-	{
-		float dBikes = 1e10;
-		float precalcWidth = float(textureSize(iPrecalcTexture, 0).x);
-		for (int i = 0; i < 5; i++)
-		{
-			float offs = float(i) * 4.0;
-			vec3 bikePosition = texture(iPrecalcTexture, vec2(offs / precalcWidth, iTime / 3.0)).xyz;
-			mat3 bikeTranslation = mat3(
-				texture(iPrecalcTexture, vec2((offs + 1.0) / precalcWidth, iTime / 3.0)).xyz
-				, texture(iPrecalcTexture, vec2((offs + 2.0) / precalcWidth, iTime / 3.0)).xyz
-				, texture(iPrecalcTexture, vec2((offs + 3.0) / precalcWidth, iTime / 3.0)).xyz
-			);
-			dBikes = min(dBikes, sdBikeFrame(bikeTranslation * (pos - bikePosition)));
-		}
+	// if (sdBox(pos-vec3(0.0, 0.95, 0.0), vec3(1.0, 0.9, 1.0)) < 1e10) // 111 -> 134 FPS (540p)
+	// {
+	// 	float dBikes = 1e10;
+	// 	float precalcWidth = float(textureSize(iPrecalcTexture, 0).x);
+	// 	for (int i = 0; i < 5; i++)
+	// 	{
+	// 		float offs = float(i) * 4.0;
+	// 		vec3 bikePosition = texture(iPrecalcTexture, vec2(offs / precalcWidth, iTime / 3.0)).xyz;
+	// 		mat3 bikeTranslation = mat3(
+	// 			texture(iPrecalcTexture, vec2((offs + 1.0) / precalcWidth, iTime / 3.0)).xyz
+	// 			, texture(iPrecalcTexture, vec2((offs + 2.0) / precalcWidth, iTime / 3.0)).xyz
+	// 			, texture(iPrecalcTexture, vec2((offs + 3.0) / precalcWidth, iTime / 3.0)).xyz
+	// 		);
+	// 		dBikes = min(dBikes, sdBikeFrame(bikeTranslation * (pos - bikePosition)));
+	// 	}
 
-		// Cut / clip / w/e
-		dBikes = max(-sdBox(pos-vec3(0.0, 7.8, 0.3), vec3(2.0, 6.0, 2.0)), dBikes);
+	// 	// Cut / clip / w/e
+	// 	dBikes = max(-sdBox(pos-vec3(0.0, 7.8, 0.3), vec3(2.0, 6.0, 2.0)), dBikes);
 
-		obj = opMinColored(obj, vec4(0.2, 0.9, 0.9, dBikes));
-	}
+	// 	obj = opMinColored(obj, vec4(0.2, 0.9, 0.9, dBikes));
+	// }
 
 	// Bowl
 	obj = opMinColored(obj, vec4(0.9, 0.9, 0.9, sdBowl(pos)));
+
+	// Chopstick
+	float chopz = sdChopsticks(pos - vec3(1.2, 0.08, -0.2));
+	chopz = min(chopz, sdChopsticks(pos - vec3(1.249, 0.08, -0.2)));
+	obj = opMinColored(obj, vec4(rgb(205,133,63), chopz));
 
 	// Table mat
 	return opMinColored(obj, sdTableMat(pos));

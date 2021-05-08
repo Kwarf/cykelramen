@@ -26,7 +26,7 @@ func _input(event):
 
 [sub_resource type="Animation" id=3]
 resource_name = "Demo"
-length = 3.0
+length = 60.0
 loop = true
 tracks/0/type = "value"
 tracks/0/path = NodePath("MarchTarget:material:shader_param/iTime")
@@ -35,10 +35,10 @@ tracks/0/loop_wrap = true
 tracks/0/imported = false
 tracks/0/enabled = true
 tracks/0/keys = {
-"times": PoolRealArray( 0, 3 ),
+"times": PoolRealArray( 0, 60 ),
 "transitions": PoolRealArray( 1, 1 ),
 "update": 0,
-"values": [ 0.0, 3.0 ]
+"values": [ 0.0, 60.0 ]
 }
 
 [node name="Spatial" type="Spatial"]
@@ -47,12 +47,14 @@ __meta__ = {
 }
 
 [node name="Precalc" parent="." instance=ExtResource( 3 )]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -2.38419e-07, 2.38419e-07 )
 
-[node name="Camera" type="Position3D" parent="."]
-transform = Transform( 0.818551, 0.207982, 0.53546, 0, 0.932153, -0.362064, -0.574434, 0.296368, 0.763015, -2.66011, 3.05, -3.3453 )
+[node name="CameraAttachment" type="Position3D" parent="."]
+transform = Transform( 0.691614, 0.232965, 0.683665, 0, 0.946554, -0.322547, -0.722268, 0.223078, 0.65465, 0, 1.12852, 0 )
 
-[node name="Target" type="Position3D" parent="Camera"]
+[node name="Camera" type="Position3D" parent="CameraAttachment"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -5 )
+
+[node name="Target" type="Spatial" parent="CameraAttachment/Camera"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 1 )
 __meta__ = {
 "_edit_lock_": true
