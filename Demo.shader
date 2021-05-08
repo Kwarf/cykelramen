@@ -6,6 +6,13 @@ uniform vec3 iCameraLookAt;
 uniform vec3 iBallPosition;
 uniform sampler2D iPrecalcTexture;
 
+const float BPM = 175.0;
+
+// Beat sync toys
+float beat(float time) { return time / (60.0 / BPM); }
+float bar(float time) { return beat(time) / 4.0; }
+float punch(float time) { float slask; return 1.0 - modf(beat(time), slask); }
+
 vec3 rgb(int r, int g, int b)
 {
 	return vec3(float(r) / 255.0
@@ -235,15 +242,66 @@ vec4 scene(vec3 pos)
 	// }
 
 	// Bowl
-	obj = opMinColored(obj, vec4(0.9, 0.9, 0.9, sdBowl(pos)));
+	float magic = 0.17*2.0;
+	float beat = beat(iTime+magic);
+	if (beat > 16.0 && beat < 17.0)
+	{
+		// Tease the bowl
+		float bowl = sdBox(pos - vec3(0.0, 1.0 - punch(iTime+magic), 0.0), vec3(1.0, 0.05, 1.0));
+		bowl = max(bowl, sdBowl(pos));
+		obj = opMinColored(obj, vec4(0.9, 0.9, 0.9, bowl));
+	}
+	else if (beat > 18.0 && beat < 19.0)
+	{
+		// Whoop the bowl
+		float bowl = sdBox(pos - vec3(0.0, 1.5 - punch(iTime+magic), 0.0), vec3(1.0, 0.6, 1.0));
+		bowl = max(-bowl, sdBowl(pos));
+		obj = opMinColored(obj, vec4(0.9, 0.9, 0.9, bowl));
+	}
+	else if (beat >= 19.0)
+	{
+		obj = opMinColored(obj, vec4(0.9, 0.9, 0.9, sdBowl(pos)));
+	}
 
 	// Chopstick
-	float chopz = sdChopsticks(pos - vec3(1.2, 0.08, -0.2));
-	chopz = min(chopz, sdChopsticks(pos - vec3(1.249, 0.08, -0.2)));
-	obj = opMinColored(obj, vec4(rgb(205,133,63), chopz));
+	if (iTime >= 3.0)
+	{
+		if (iTime < 4.0)
+		{
+			// Cutty stick
+			vec3 p = pos;
+			p -= vec3(1.2, 0.08, (iTime - 3.0) * -2.2);
+			float chopz = sdChopsticks(pos - vec3(1.2, 0.08, -0.2));
+			chopz = min(chopz, sdChopsticks(pos - vec3(1.249, 0.08, -0.2)));
+			chopz = max(-sdBox(p, vec3(0.1, 0.1, 1.1)), chopz);
+			obj = opMinColored(obj, vec4(rgb(205,133,63), chopz));
+		}
+		else
+		{
+			float chopz = sdChopsticks(pos - vec3(1.2, 0.08, -0.2));
+			chopz = min(chopz, sdChopsticks(pos - vec3(1.249, 0.08, -0.2)));
+			obj = opMinColored(obj, vec4(rgb(205,133,63), chopz));
+		}
+	}
+
+	if (iTime > 2.0 && iTime < 3.0)
+	{
+		// Cutty cube for matty dude fade in thingy
+		vec3 p = pos;
+		pR(p.xz, radians(45));
+		p += vec3(0.0, 0.0, (iTime - 2.0) * 6.0);
+		vec4 mat = sdTableMat(pos);
+		mat.w = max(-sdBox(p, vec3(3.0, 0.5, 3.0)), mat.w);
+		obj = opMinColored(obj, mat);
+	}
+	else if (iTime >= 3.0)
+	{
+		// No more fadey, is there now
+		obj = opMinColored(obj, sdTableMat(pos));
+	}
 
 	// Table mat
-	return opMinColored(obj, sdTableMat(pos));
+	return obj;
 }
 
 vec4 march(vec3 origin, vec3 direction)

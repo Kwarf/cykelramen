@@ -24,6 +24,10 @@ config/name="glöp"
 run/main_scene="res://Demo.tscn"
 config/icon="res://icon.png"
 
+[audio]
+
+output_latency=250
+
 [display]
 
 window/size/width=960

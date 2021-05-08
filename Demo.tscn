@@ -1,8 +1,9 @@
-[gd_scene load_steps=7 format=2]
+[gd_scene load_steps=8 format=2]
 
 [ext_resource path="res://Demo.shader" type="Shader" id=1]
 [ext_resource path="res://Demo.gd" type="Script" id=2]
 [ext_resource path="res://Precalc.tscn" type="PackedScene" id=3]
+[ext_resource path="res://assets/Cykelramen.ogg" type="AudioStream" id=4]
 
 [sub_resource type="ShaderMaterial" id=1]
 shader = ExtResource( 1 )
@@ -29,16 +30,52 @@ resource_name = "Demo"
 length = 60.0
 loop = true
 tracks/0/type = "value"
-tracks/0/path = NodePath("MarchTarget:material:shader_param/iTime")
-tracks/0/interp = 1
+tracks/0/path = NodePath("CameraAttachment:translation")
+tracks/0/interp = 2
 tracks/0/loop_wrap = true
 tracks/0/imported = false
 tracks/0/enabled = true
 tracks/0/keys = {
-"times": PoolRealArray( 0, 60 ),
+"times": PoolRealArray( 0, 2 ),
 "transitions": PoolRealArray( 1, 1 ),
 "update": 0,
-"values": [ 0.0, 60.0 ]
+"values": [ Vector3( 6.58158, 1.5, 0 ), Vector3( 0, 1.5, 0 ) ]
+}
+tracks/1/type = "value"
+tracks/1/path = NodePath("CameraAttachment:rotation_degrees")
+tracks/1/interp = 2
+tracks/1/loop_wrap = true
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/keys = {
+"times": PoolRealArray( 0, 2 ),
+"transitions": PoolRealArray( 1, 1 ),
+"update": 0,
+"values": [ Vector3( 20, -55.043, 0 ), Vector3( 20, 0, 0 ) ]
+}
+tracks/2/type = "value"
+tracks/2/path = NodePath("AnimationPlayer:playback_speed")
+tracks/2/interp = 1
+tracks/2/loop_wrap = true
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/keys = {
+"times": PoolRealArray( 0, 7 ),
+"transitions": PoolRealArray( 1, 1 ),
+"update": 1,
+"values": [ 1.0, 0.0 ]
+}
+tracks/3/type = "value"
+tracks/3/path = NodePath("AudioStreamPlayer:stream_paused")
+tracks/3/interp = 1
+tracks/3/loop_wrap = true
+tracks/3/imported = false
+tracks/3/enabled = true
+tracks/3/keys = {
+"times": PoolRealArray( 0, 7 ),
+"transitions": PoolRealArray( 1, 1 ),
+"update": 1,
+"values": [ false, true ]
 }
 
 [node name="Spatial" type="Spatial"]
@@ -49,10 +86,10 @@ __meta__ = {
 [node name="Precalc" parent="." instance=ExtResource( 3 )]
 
 [node name="CameraAttachment" type="Position3D" parent="."]
-transform = Transform( 0.691614, 0.232965, 0.683665, 0, 0.946554, -0.322547, -0.722268, 0.223078, 0.65465, 0, 1.12852, 0 )
+transform = Transform( 0.572962, -0.280314, -0.770155, 0, 0.939693, -0.34202, 0.819583, 0.195964, 0.538408, 6.58158, 1.5, 0 )
 
 [node name="Camera" type="Position3D" parent="CameraAttachment"]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -5 )
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -4.8 )
 
 [node name="Target" type="Spatial" parent="CameraAttachment/Camera"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 1 )
@@ -62,6 +99,11 @@ __meta__ = {
 
 [node name="Ball" type="Position3D" parent="."]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 1.94783, 1.66541, -3.26705 )
+
+[node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="."]
+stream = ExtResource( 4 )
+autoplay = true
+stream_paused = true
 
 [node name="MarchTarget" type="ColorRect" parent="."]
 visible = false
@@ -83,7 +125,6 @@ __meta__ = {
 }
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="."]
-playback_speed = 0.3
 anims/Demo = SubResource( 3 )
 
 [connection signal="precalc_done" from="Precalc" to="MarchTarget" method="play"]
