@@ -26,7 +26,7 @@ config/icon="res://icon.png"
 
 [audio]
 
-output_latency=250
+output_latency=100
 
 [display]
 

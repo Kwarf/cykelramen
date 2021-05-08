@@ -6,11 +6,11 @@ uniform vec3 iCameraLookAt;
 uniform vec3 iBallPosition;
 uniform sampler2D iPrecalcTexture;
 
+const float PRECALC_TIME = (1.0 / 60.0) * 256.0;
 const float BPM = 175.0;
 
 // Beat sync toys
 float beat(float time) { return time / (60.0 / BPM); }
-float bar(float time) { return beat(time) / 4.0; }
 float punch(float time) { float slask; return 1.0 - modf(beat(time), slask); }
 
 vec3 rgb(int r, int g, int b)
@@ -219,48 +219,55 @@ vec4 scene(vec3 pos)
 	obj = opMinColored(obj, vec4(0.8, 0.8, 1.0, sdRoundBox(pos-vec3(0.0, 2.5, 0.3), vec3(0.7, 0.6, 1.0), 0.1)));
 
 	// Bikes
-	// if (sdBox(pos-vec3(0.0, 0.95, 0.0), vec3(1.0, 0.9, 1.0)) < 1e10) // 111 -> 134 FPS (540p)
-	// {
-	// 	float dBikes = 1e10;
-	// 	float precalcWidth = float(textureSize(iPrecalcTexture, 0).x);
-	// 	for (int i = 0; i < 5; i++)
-	// 	{
-	// 		float offs = float(i) * 4.0;
-	// 		vec3 bikePosition = texture(iPrecalcTexture, vec2(offs / precalcWidth, iTime / 3.0)).xyz;
-	// 		mat3 bikeTranslation = mat3(
-	// 			texture(iPrecalcTexture, vec2((offs + 1.0) / precalcWidth, iTime / 3.0)).xyz
-	// 			, texture(iPrecalcTexture, vec2((offs + 2.0) / precalcWidth, iTime / 3.0)).xyz
-	// 			, texture(iPrecalcTexture, vec2((offs + 3.0) / precalcWidth, iTime / 3.0)).xyz
-	// 		);
-	// 		dBikes = min(dBikes, sdBikeFrame(bikeTranslation * (pos - bikePosition)));
-	// 	}
+	if (iTime > 4.95 && sdBox(pos-vec3(0.0, 0.95, 0.0), vec3(1.0, 0.9, 1.0)) < 1e10) // 111 -> 134 FPS (540p)
+	{
+		float sampleRow = min((iTime - 4.95) / PRECALC_TIME, 1.0);
+		float dBikes = 1e10;
+		float precalcWidth = float(textureSize(iPrecalcTexture, 0).x);
+		for (int i = 0; i < 5; i++)
+		{
+			float offs = float(i) * 4.0;
+			vec3 bikePosition = texture(iPrecalcTexture, vec2(offs / precalcWidth, sampleRow)).xyz;
+			mat3 bikeTranslation = mat3(
+				texture(iPrecalcTexture, vec2((offs + 1.0) / precalcWidth, sampleRow)).xyz
+				, texture(iPrecalcTexture, vec2((offs + 2.0) / precalcWidth, sampleRow)).xyz
+				, texture(iPrecalcTexture, vec2((offs + 3.0) / precalcWidth, sampleRow)).xyz
+			);
+			dBikes = min(dBikes, sdBikeFrame(bikeTranslation * (pos - bikePosition)));
+		}
 
-	// 	// Cut / clip / w/e
-	// 	dBikes = max(-sdBox(pos-vec3(0.0, 7.8, 0.3), vec3(2.0, 6.0, 2.0)), dBikes);
+		// Cut / clip / w/e
+		dBikes = max(-sdBox(pos-vec3(0.0, 7.8, 0.3), vec3(2.0, 6.0, 2.0)), dBikes);
 
-	// 	obj = opMinColored(obj, vec4(0.2, 0.9, 0.9, dBikes));
-	// }
+		obj = opMinColored(obj, vec4(0.2, 0.9, 0.9, dBikes));
+	}
 
 	// Bowl
-	float magic = 0.17*2.0;
-	float beat = beat(iTime+magic);
-	if (beat > 16.0 && beat < 17.0)
+	float beat = beat(iTime);
+	if (beat >= 13.0 && beat < 14.0)
 	{
 		// Tease the bowl
-		float bowl = sdBox(pos - vec3(0.0, 1.0 - punch(iTime+magic), 0.0), vec3(1.0, 0.05, 1.0));
+		float bowl = sdBox(pos - vec3(0.0, 1.0 - punch(iTime), 0.0), vec3(1.0, 0.05, 1.0));
 		bowl = max(bowl, sdBowl(pos));
 		obj = opMinColored(obj, vec4(0.9, 0.9, 0.9, bowl));
 	}
-	else if (beat > 18.0 && beat < 19.0)
+	else if (beat >= 15.0 && beat < 16.0)
 	{
 		// Whoop the bowl
-		float bowl = sdBox(pos - vec3(0.0, 1.5 - punch(iTime+magic), 0.0), vec3(1.0, 0.6, 1.0));
+		float bowl = sdBox(pos - vec3(0.0, 1.5 - punch(iTime), 0.0), vec3(1.0, 0.6, 1.0));
 		bowl = max(-bowl, sdBowl(pos));
 		obj = opMinColored(obj, vec4(0.9, 0.9, 0.9, bowl));
 	}
-	else if (beat >= 19.0)
+	else if (beat >= 16.0 && beat < 29.0)
 	{
+		// Show the bowl
 		obj = opMinColored(obj, vec4(0.9, 0.9, 0.9, sdBowl(pos)));
+	}
+	else if (beat >= 29.0)
+	{
+		// Boop the bowl
+		vec3 p = pos * (1.0 + punch(iTime) * -0.05);
+		obj = opMinColored(obj, vec4(0.9, 0.9, 0.9, sdBowl(p)));
 	}
 
 	// Chopstick

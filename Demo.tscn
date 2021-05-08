@@ -36,10 +36,10 @@ tracks/0/loop_wrap = true
 tracks/0/imported = false
 tracks/0/enabled = true
 tracks/0/keys = {
-"times": PoolRealArray( 0, 2 ),
-"transitions": PoolRealArray( 1, 1 ),
+"times": PoolRealArray( 0, 2, 7 ),
+"transitions": PoolRealArray( 1, 1, 1 ),
 "update": 0,
-"values": [ Vector3( 6.58158, 1.5, 0 ), Vector3( 0, 1.5, 0 ) ]
+"values": [ Vector3( 6.58158, 1.5, 0 ), Vector3( 0, 1.5, 0 ), Vector3( 0, 1.5, 0 ) ]
 }
 tracks/1/type = "value"
 tracks/1/path = NodePath("CameraAttachment:rotation_degrees")
@@ -48,10 +48,10 @@ tracks/1/loop_wrap = true
 tracks/1/imported = false
 tracks/1/enabled = true
 tracks/1/keys = {
-"times": PoolRealArray( 0, 2 ),
-"transitions": PoolRealArray( 1, 1 ),
+"times": PoolRealArray( 0, 2, 7 ),
+"transitions": PoolRealArray( 1, 1, 1 ),
 "update": 0,
-"values": [ Vector3( 20, -55.043, 0 ), Vector3( 20, 0, 0 ) ]
+"values": [ Vector3( 20, -55.043, 0 ), Vector3( 20, 0, 0 ), Vector3( 20, 0, 0 ) ]
 }
 tracks/2/type = "value"
 tracks/2/path = NodePath("AnimationPlayer:playback_speed")
@@ -60,22 +60,36 @@ tracks/2/loop_wrap = true
 tracks/2/imported = false
 tracks/2/enabled = true
 tracks/2/keys = {
-"times": PoolRealArray( 0, 7 ),
+"times": PoolRealArray( 0, 16 ),
 "transitions": PoolRealArray( 1, 1 ),
 "update": 1,
 "values": [ 1.0, 0.0 ]
 }
-tracks/3/type = "value"
-tracks/3/path = NodePath("AudioStreamPlayer:stream_paused")
+tracks/3/type = "method"
+tracks/3/path = NodePath("MarchTarget")
 tracks/3/interp = 1
 tracks/3/loop_wrap = true
 tracks/3/imported = false
 tracks/3/enabled = true
 tracks/3/keys = {
-"times": PoolRealArray( 0, 7 ),
-"transitions": PoolRealArray( 1, 1 ),
+"times": PoolRealArray( 16 ),
+"transitions": PoolRealArray( 1 ),
+"values": [ {
+"args": [  ],
+"method": "pause"
+} ]
+}
+tracks/4/type = "value"
+tracks/4/path = NodePath("AudioStreamPlayer:playing")
+tracks/4/interp = 1
+tracks/4/loop_wrap = true
+tracks/4/imported = false
+tracks/4/enabled = true
+tracks/4/keys = {
+"times": PoolRealArray( 0 ),
+"transitions": PoolRealArray( 1 ),
 "update": 1,
-"values": [ false, true ]
+"values": [ true ]
 }
 
 [node name="Spatial" type="Spatial"]
@@ -102,8 +116,6 @@ transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 1.94783, 1.66541, -3.26705 )
 
 [node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="."]
 stream = ExtResource( 4 )
-autoplay = true
-stream_paused = true
 
 [node name="MarchTarget" type="ColorRect" parent="."]
 visible = false
@@ -126,5 +138,3 @@ __meta__ = {
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="."]
 anims/Demo = SubResource( 3 )
-
-[connection signal="precalc_done" from="Precalc" to="MarchTarget" method="play"]

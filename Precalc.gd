@@ -2,19 +2,17 @@ extends Spatial
 
 # Each bike takes 4 pixels of precalc storage per frame (one vec3 for position, one mat3x3 for translation)
 const NO_BIKES: int = 5
-const PRECALC_TICKS: int = 160
+const PRECALC_TICKS: int = 256
 
 var image: Image = Image.new()
 var bikes: Array
 var tick: int = 0
 
-signal precalc_done
-
 func _ready():
 	# Hacky skippy boi for dev
-	tick = PRECALC_TICKS
-	queue_free()
-	get_parent().find_node("MarchTarget").call_deferred("play", null)
+#	tick = PRECALC_TICKS
+#	queue_free()
+#	get_parent().find_node("MarchTarget").call_deferred("play", null)
 
 	# Non skippy, put back for release, duh!
 	image.create(PRECALC_TICKS, PRECALC_TICKS, false, Image.FORMAT_RGBF);
@@ -60,5 +58,6 @@ func _physics_process(_delta):
 	if tick >= PRECALC_TICKS:
 		var texture = ImageTexture.new()
 		texture.create_from_image(image, 0);
+		$ColorRect.visible = false
+		get_parent().find_node("MarchTarget").call_deferred("play", texture)
 		queue_free()
-		emit_signal("precalc_done", texture)
