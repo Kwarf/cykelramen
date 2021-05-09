@@ -210,7 +210,7 @@ float sdChopsticks(vec3 pos)
 	return t;
 }
 
-vec4 scene(vec3 pos)
+vec4 dinerScene(vec3 pos)
 {
 	// Table
 	vec4 obj = vec4(0.2, 0.2, 0.2, sdRoundBox(pos+vec3(0.0, 0.08, 0.0), vec3(10.0, 0.03, 1.4), 0.05));
@@ -219,9 +219,9 @@ vec4 scene(vec3 pos)
 	obj = opMinColored(obj, vec4(0.8, 0.8, 1.0, sdRoundBox(pos-vec3(0.0, 2.5, 0.3), vec3(0.7, 0.6, 1.0), 0.1)));
 
 	// Bikes
-	if (iTime > 4.95 && sdBox(pos-vec3(0.0, 0.95, 0.0), vec3(1.0, 0.9, 1.0)) < 1e10) // 111 -> 134 FPS (540p)
+	if (iTime > 6.0 && sdBox(pos-vec3(0.0, 0.95, 0.0), vec3(1.0, 0.9, 1.0)) < 1e10) // 111 -> 134 FPS (540p)
 	{
-		float sampleRow = min((iTime - 4.95) / PRECALC_TIME, 1.0);
+		float sampleRow = min((iTime - 6.0) / PRECALC_TIME, 1.0);
 		float dBikes = 1e10;
 		float precalcWidth = float(textureSize(iPrecalcTexture, 0).x);
 		for (int i = 0; i < 5; i++)
@@ -244,26 +244,26 @@ vec4 scene(vec3 pos)
 
 	// Bowl
 	float beat = beat(iTime);
-	if (beat >= 13.0 && beat < 14.0)
+	if (beat >= 16.0 && beat < 17.0)
 	{
 		// Tease the bowl
 		float bowl = sdBox(pos - vec3(0.0, 1.0 - punch(iTime), 0.0), vec3(1.0, 0.05, 1.0));
 		bowl = max(bowl, sdBowl(pos));
 		obj = opMinColored(obj, vec4(0.9, 0.9, 0.9, bowl));
 	}
-	else if (beat >= 15.0 && beat < 16.0)
+	else if (beat >= 18.0 && beat < 19.0)
 	{
 		// Whoop the bowl
 		float bowl = sdBox(pos - vec3(0.0, 1.5 - punch(iTime), 0.0), vec3(1.0, 0.6, 1.0));
 		bowl = max(-bowl, sdBowl(pos));
 		obj = opMinColored(obj, vec4(0.9, 0.9, 0.9, bowl));
 	}
-	else if (beat >= 16.0 && beat < 29.0)
+	else if (beat >= 19.0 && beat < 32.0)
 	{
 		// Show the bowl
 		obj = opMinColored(obj, vec4(0.9, 0.9, 0.9, sdBowl(pos)));
 	}
-	else if (beat >= 29.0)
+	else if (beat >= 32.0)
 	{
 		// Boop the bowl
 		vec3 p = pos * (1.0 + punch(iTime) * -0.05);
@@ -309,6 +309,39 @@ vec4 scene(vec3 pos)
 
 	// Table mat
 	return obj;
+}
+
+vec4 bikeScene(vec3 pos)
+{
+	float bg = sdBox(pos, vec3(10.0, 0.1, 10.0));
+	bg = min(bg, sdBox(pos-vec3(0.0, 0.0, 5.0), vec3(10.0, 10.0, 1.0)));
+	vec4 obj = vec4(0.05, 0.05, 0.05, bg);
+
+	vec3 p = pos - vec3(-2.5, 0.5, 0.0);
+	pR(p.xz, cos(iTime)*2.3);
+	pR(p.xy, sin(iTime)*1.8);
+	obj = opMinColored(obj, vec4(1.0, 0.0, 0.0, sdBikeFrame(p)));
+	p = pos - vec3(0.0, 0.6, 0.0);
+	pR(p.xz, sin(iTime)*3.6);
+	pR(p.xy, cos(iTime)*1.2);
+	obj = opMinColored(obj, vec4(0.0, 1.0, 0.0, sdBikeFrame(p)));
+	p = pos - vec3(2.5, 0.5, 0.0);
+	pR(p.xz, -sin(iTime)*2.7);
+	pR(p.xy, -cos(iTime)*1.5);
+	obj = opMinColored(obj, vec4(0.0, 0.0, 2.0, sdBikeFrame(p)));
+
+	return obj;
+}
+
+vec4 scene(vec3 pos)
+{
+	float beat = beat(iTime);
+	if (beat >= 48.0)
+	{
+		return bikeScene(pos);
+	}
+
+	return dinerScene(pos);
 }
 
 vec4 march(vec3 origin, vec3 direction)

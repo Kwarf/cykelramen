@@ -29,7 +29,6 @@ func _process(delta: float) -> void:
 
 func play(precalc_data: ImageTexture) -> void:
 	self.material.set_shader_param("iPrecalcTexture", precalc_data);
-	self.visible = true
 	self.clear_elapsed = true
 	self.animation_player.play("Demo")
 

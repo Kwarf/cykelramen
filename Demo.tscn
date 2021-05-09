@@ -28,30 +28,29 @@ func _input(event):
 [sub_resource type="Animation" id=3]
 resource_name = "Demo"
 length = 60.0
-loop = true
 tracks/0/type = "value"
 tracks/0/path = NodePath("CameraAttachment:translation")
-tracks/0/interp = 2
+tracks/0/interp = 1
 tracks/0/loop_wrap = true
 tracks/0/imported = false
 tracks/0/enabled = true
 tracks/0/keys = {
-"times": PoolRealArray( 0, 2, 7 ),
+"times": PoolRealArray( 0, 2, 16.45 ),
 "transitions": PoolRealArray( 1, 1, 1 ),
 "update": 0,
 "values": [ Vector3( 6.58158, 1.5, 0 ), Vector3( 0, 1.5, 0 ), Vector3( 0, 1.5, 0 ) ]
 }
 tracks/1/type = "value"
 tracks/1/path = NodePath("CameraAttachment:rotation_degrees")
-tracks/1/interp = 2
+tracks/1/interp = 1
 tracks/1/loop_wrap = true
 tracks/1/imported = false
 tracks/1/enabled = true
 tracks/1/keys = {
-"times": PoolRealArray( 0, 2, 7 ),
-"transitions": PoolRealArray( 1, 1, 1 ),
+"times": PoolRealArray( 0, 2, 16.44, 16.45 ),
+"transitions": PoolRealArray( 1, 1, 1, 1 ),
 "update": 0,
-"values": [ Vector3( 20, -55.043, 0 ), Vector3( 20, 0, 0 ), Vector3( 20, 0, 0 ) ]
+"values": [ Vector3( 20, -55.043, 0 ), Vector3( 20, 0, 0 ), Vector3( 20, 0, 0 ), Vector3( 10, 0, 0 ) ]
 }
 tracks/2/type = "value"
 tracks/2/path = NodePath("AnimationPlayer:playback_speed")
@@ -60,7 +59,7 @@ tracks/2/loop_wrap = true
 tracks/2/imported = false
 tracks/2/enabled = true
 tracks/2/keys = {
-"times": PoolRealArray( 0, 16 ),
+"times": PoolRealArray( 0, 27 ),
 "transitions": PoolRealArray( 1, 1 ),
 "update": 1,
 "values": [ 1.0, 0.0 ]
@@ -72,7 +71,7 @@ tracks/3/loop_wrap = true
 tracks/3/imported = false
 tracks/3/enabled = true
 tracks/3/keys = {
-"times": PoolRealArray( 16 ),
+"times": PoolRealArray( 27 ),
 "transitions": PoolRealArray( 1 ),
 "values": [ {
 "args": [  ],
@@ -97,10 +96,8 @@ __meta__ = {
 "_edit_lock_": true
 }
 
-[node name="Precalc" parent="." instance=ExtResource( 3 )]
-
 [node name="CameraAttachment" type="Position3D" parent="."]
-transform = Transform( 0.572962, -0.280314, -0.770155, 0, 0.939693, -0.34202, 0.819583, 0.195964, 0.538408, 6.58158, 1.5, 0 )
+transform = Transform( 1, 0, 0, 0, 0.939693, -0.34202, 0, 0.34202, 0.939692, 0, 1.5, 0 )
 
 [node name="Camera" type="Position3D" parent="CameraAttachment"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -4.8 )
@@ -118,7 +115,6 @@ transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 1.94783, 1.66541, -3.26705 )
 stream = ExtResource( 4 )
 
 [node name="MarchTarget" type="ColorRect" parent="."]
-visible = false
 material = SubResource( 1 )
 anchor_right = 1.0
 anchor_bottom = 1.0
@@ -138,3 +134,5 @@ __meta__ = {
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="."]
 anims/Demo = SubResource( 3 )
+
+[node name="Precalc" parent="." instance=ExtResource( 3 )]
