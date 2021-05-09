@@ -78,18 +78,6 @@ tracks/3/keys = {
 "method": "pause"
 } ]
 }
-tracks/4/type = "value"
-tracks/4/path = NodePath("AudioStreamPlayer:playing")
-tracks/4/interp = 1
-tracks/4/loop_wrap = true
-tracks/4/imported = false
-tracks/4/enabled = true
-tracks/4/keys = {
-"times": PoolRealArray( 0 ),
-"transitions": PoolRealArray( 1 ),
-"update": 1,
-"values": [ true ]
-}
 
 [node name="Spatial" type="Spatial"]
 __meta__ = {
@@ -128,6 +116,26 @@ margin_left = 16.0
 margin_top = 16.0
 text = "Reload shader"
 script = SubResource( 2 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="PlayButton" type="CheckButton" parent="MarchTarget"]
+margin_left = 16.0
+margin_top = 33.3529
+margin_right = 121.333
+margin_bottom = 73.3529
+pressed = true
+text = "Play"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="LineEdit" type="LineEdit" parent="MarchTarget"]
+margin_left = 16.6674
+margin_top = 67.9819
+margin_right = 117.667
+margin_bottom = 91.9819
 __meta__ = {
 "_edit_use_anchors_": false
 }

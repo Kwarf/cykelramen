@@ -9,12 +9,6 @@ var bikes: Array
 var tick: int = 0
 
 func _ready():
-	# Hacky skippy boi for dev
-#	tick = PRECALC_TICKS
-#	queue_free()
-#	get_parent().find_node("MarchTarget").call_deferred("play", null)
-
-	# Non skippy, put back for release, duh!
 	image.create(PRECALC_TICKS, PRECALC_TICKS, false, Image.FORMAT_RGBF);
 	image.lock()
 	bikes.append(find_node("Bike1"))
@@ -58,6 +52,5 @@ func _physics_process(_delta):
 	if tick >= PRECALC_TICKS:
 		var texture = ImageTexture.new()
 		texture.create_from_image(image, 0);
-		$ColorRect.visible = false
 		get_parent().find_node("MarchTarget").call_deferred("play", texture)
 		queue_free()

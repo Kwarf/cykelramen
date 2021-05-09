@@ -291,17 +291,17 @@ vec4 dinerScene(vec3 pos)
 		}
 	}
 
-	if (iTime > 2.0 && iTime < 3.0)
+	if (beat > 8.0 && beat < 10.0)
 	{
 		// Cutty cube for matty dude fade in thingy
 		vec3 p = pos;
 		pR(p.xz, radians(45));
-		p += vec3(0.0, 0.0, (iTime - 2.0) * 6.0);
+		p += vec3(0.0, 0.0, (beat - 8.0) * 4.0);
 		vec4 mat = sdTableMat(pos);
 		mat.w = max(-sdBox(p, vec3(3.0, 0.5, 3.0)), mat.w);
 		obj = opMinColored(obj, mat);
 	}
-	else if (iTime >= 3.0)
+	else if (beat > 10.0)
 	{
 		// No more fadey, is there now
 		obj = opMinColored(obj, sdTableMat(pos));
