@@ -8,6 +8,7 @@ uniform sampler2D iPrecalcTexture;
 
 const float PRECALC_TIME = (1.0 / 60.0) * 256.0;
 const float BPM = 175.0;
+const float PI = 3.14159;
 
 // Beat sync toys
 float beat(float time) { return time / (60.0 / BPM); }
@@ -24,6 +25,17 @@ vec3 rgb(int r, int g, int b)
 void pR(inout vec2 p, float a)
 {
 	p = cos(a)*p + sin(a)*vec2(p.y, -p.x);
+}
+
+float pModPolar(inout vec2 p, float repetitions) {
+	float angle = 2.0*PI/repetitions;
+	float a = atan(p.y, p.x) + angle/2.;
+	float r = length(p);
+	float c = floor(a/angle);
+	a = mod(a,angle) - angle/2.;
+	p = vec2(cos(a), sin(a))*r;
+	if (abs(c) >= (repetitions/2.0)) c = abs(c);
+	return c;
 }
 
 float fOpUnionRound(float a, float b, float r)
@@ -47,6 +59,11 @@ float opExtrusion(vec3 p, float sdf, float h)
 vec4 opMinColored(vec4 a, vec4 b)
 {
 	return a.w < b.w ? a : b;
+}
+
+vec3 opRep(vec3 p, vec3 c)
+{
+	return mod(p+0.5*c,c)-0.5*c;
 }
 
 vec3 opRepLim(vec3 p, float c, vec3 l)
@@ -210,6 +227,71 @@ float sdChopsticks(vec3 pos)
 	return t;
 }
 
+vec4 showcase(vec3 pos)
+{
+	float box = sdRoundBox(pos, vec3(0.8, 0.1, 0.8), 0.1);
+	vec4 obj = vec4(1.0, 1.0, 1.0, box);
+
+	vec3 p = pos - vec3(0.0, 0.2, 0.0);
+	pR(p.xy, radians(-12));
+	obj = opMinColored(obj, vec4(1.0, 0.0, 0.0, sdBikeFrame(p)));
+
+	p = pos - vec3(0.2, 0.2 + 0.01, -0.5);
+	pR(p.xz, radians(-60));
+	float chopz = sdChopsticks(p);
+	p -= vec3(0.1, 0.04, 0.0);
+	pR(p.yz, radians(3.5));
+	pR(p.xz, radians(-15));
+	chopz = min(chopz, sdChopsticks(p));
+	obj = opMinColored(obj, vec4(rgb(205,133,63), chopz));
+
+	return obj;
+}
+
+vec3 pit(vec3 p, float time) // PositionInTunnel™
+{
+	float glopper = (time - 17.0) * 2.0;
+	pR(p.xy, cos(p.z*0.01) * 4.5);
+	pR(p.xy, cos(p.z*0.2) * 0.4);
+	pR(p.yz, cos(p.z*0.002) * 0.01);
+	p.x += cos(glopper+p.z*0.1) * 3.0;
+	p.y += cos(glopper+p.z*0.05) * 2.0;
+	return p;
+}
+
+float sdTunnel(vec3 pos)
+{
+	vec3 p = pit(pos - vec3(0.0, 2.0, (iTime - 17.0) * -25.0), iTime);
+
+	// Revolve
+	pModPolar(p.xy, 7);
+	p -= vec3(6.0, 0.0, 0.0);
+	pR(p.xy, radians(90));
+
+	// Repeat
+	p = opRep(p, vec3(0.0, 0.0, 1.6));
+
+	// float t = sdBox(p, vec3(1.8, 0.2, 0.2+punch(iTime))); // <-- TODO: I like dis, next scene pls
+	float t = sdBox(p, vec3(1.8+1.0*punch(iTime), 0.2, 0.2));
+	return t;
+}
+
+float sdSecondTunnel(vec3 pos)
+{
+	vec3 p = pit(pos - vec3(0.0, 2.0, (iTime - 17.0) * -25.0), iTime);
+
+	// Revolve
+	pModPolar(p.xy, 7);
+	p -= vec3(6.0, 0.0, 0.0);
+	pR(p.xy, radians(90));
+
+	// Repeat
+	p = opRep(p, vec3(0.0, 0.0, 1.6));
+
+	float t = sdBox(p, vec3(1.8, 0.2, 0.2+punch(iTime)*0.7));
+	return t;
+}
+
 vec4 dinerScene(vec3 pos)
 {
 	// Table
@@ -311,24 +393,93 @@ vec4 dinerScene(vec3 pos)
 	return obj;
 }
 
-vec4 bikeScene(vec3 pos)
+vec4 tunnelScene(vec3 pos)
 {
-	float bg = sdBox(pos, vec3(10.0, 0.1, 10.0));
-	bg = min(bg, sdBox(pos-vec3(0.0, 0.0, 5.0), vec3(10.0, 10.0, 1.0)));
-	vec4 obj = vec4(0.05, 0.05, 0.05, bg);
+	float tunnel = sdTunnel(pos);
+	vec4 obj = vec4(rgb(64,127,255), tunnel);
 
-	vec3 p = pos - vec3(-2.5, 0.5, 0.0);
-	pR(p.xz, cos(iTime)*2.3);
-	pR(p.xy, sin(iTime)*1.8);
+	vec3 p = pos - vec3(sin(iTime)*0.5, 2.0+cos(iTime)*0.5, -1.0);
+	pR(p.xz, cos(iTime*4.5)*2.3);
+	pR(p.xy, sin(iTime*3.3)*1.8);
+	pR(p.yz, -sin(iTime*1.3)*4.6);
+	p += vec3(0.0, 0.25, 0.0);
 	obj = opMinColored(obj, vec4(1.0, 0.0, 0.0, sdBikeFrame(p)));
-	p = pos - vec3(0.0, 0.6, 0.0);
-	pR(p.xz, sin(iTime)*3.6);
-	pR(p.xy, cos(iTime)*1.2);
-	obj = opMinColored(obj, vec4(0.0, 1.0, 0.0, sdBikeFrame(p)));
-	p = pos - vec3(2.5, 0.5, 0.0);
-	pR(p.xz, -sin(iTime)*2.7);
-	pR(p.xy, -cos(iTime)*1.5);
-	obj = opMinColored(obj, vec4(0.0, 0.0, 2.0, sdBikeFrame(p)));
+
+	p = pos - vec3(cos(iTime)*0.8, 2.0+sin(iTime)*0.8, 4.0);
+	pR(p.xz, cos(iTime*1.4)*1.6);
+	pR(p.xy, sin(iTime*1.2)*2.7);
+	pR(p.yz, -sin(iTime*1.7)*3.5);
+	p += vec3(0.0, 0.5, 0.0);
+	obj = opMinColored(obj, vec4(0.9, 0.9, 0.9, sdBowl(p)));
+
+	return obj;
+}
+
+vec4 flatScene(vec3 pos)
+{
+	// Beat synced domain repetition. No, there's absolutely no better way to do this than if/else.
+	float beat = beat(iTime);
+	if (beat > 104.0)
+	{
+		pModPolar(pos.xy, beat - 104.0 + punch(iTime));
+		pos -= vec3(15.0, 0.0, 0.0);
+		pR(pos.xy, radians(90));
+		pos = opRepLim(pos, 2.5, vec3(3.0, 2.0, 3.0));
+	}
+	else if (beat > 103.0)
+	{
+		pos = opRepLim(pos, 2.5, vec3(3.0, 2.0, 3.0));
+	}
+	else if (beat > 102.0)
+	{
+		pos = opRepLim(pos, 2.5, vec3(3.0, 1.0, 3.0));
+	}
+	else if (beat > 101.0)
+	{
+		pos = opRepLim(pos, 2.5, vec3(3.0, 0.0, 3.0));
+	}
+	else if (beat > 100.0)
+	{
+		pos = opRepLim(pos, 2.5, vec3(3.0, 0.0, 2.0));
+	}
+	else if (beat > 99.0)
+	{
+		pos = opRepLim(pos, 2.5, vec3(2.0, 0.0, 2.0));
+	}
+	else if (beat > 98.0)
+	{
+		pos = opRepLim(pos, 2.5, vec3(2.0, 0.0, 1.0));
+	}
+	else if (beat > 97.0)
+	{
+		pos = opRepLim(pos, 2.5, vec3(1.0, 0.0, 1.0));
+	}
+	else if (beat > 96.0)
+	{
+		pos = opRepLim(pos, 2.5, vec3(1.0, 0.0, 0.0));
+	}
+
+	// Actual content
+	return showcase(pos);
+}
+
+vec4 secondTunnelScene(vec3 pos)
+{
+	if (beat(iTime) > 128.0)
+	{
+		pR(pos.xz, radians(90));
+		pos += vec3(12.0, 0.0, -30.0);
+	}
+
+	float tunnel = sdSecondTunnel(pos + vec3(0.0, 1.5, 0.0));
+	vec4 obj = vec4(rgb(64,127,255), tunnel);
+
+	vec3 p = pos - vec3(sin(iTime)*0.5, cos(iTime)*0.5, -25.0);
+	pR(p.xz, cos(iTime*4.5)*2.3);
+	pR(p.xy, sin(iTime*3.3)*1.8);
+	pR(p.yz, -sin(iTime*1.3)*4.6);
+	p += vec3(0.0, 0.25, 0.0);
+	obj = opMinColored(obj, showcase(p));
 
 	return obj;
 }
@@ -336,9 +487,17 @@ vec4 bikeScene(vec3 pos)
 vec4 scene(vec3 pos)
 {
 	float beat = beat(iTime);
+	if (beat >= 112.0)
+	{
+		return secondTunnelScene(pos);
+	}
+	if (beat >= 80.0)
+	{
+		return flatScene(pos);
+	}
 	if (beat >= 48.0)
 	{
-		return bikeScene(pos);
+		return tunnelScene(pos);
 	}
 
 	return dinerScene(pos);
@@ -373,12 +532,29 @@ vec3 render(vec3 rayOrigin, vec3 rayDirection)
 	vec3 color = vec3(1, 1, 1);
 	vec4 t = march(rayOrigin, rayDirection);
 
-	vec3 L = normalize(iBallPosition);
+	vec3 L;
+	float beat = beat(iTime);
+	if (beat < 48.0)
+	{
+		L = normalize(iBallPosition);
+	}
+	else
+	{
+		L = normalize(vec3(0.417, 0.425, -0.103));
+	}
 
 	if (t.w == -1.0)
 	{
 		// Miss color
-		color = vec3(0.9, 0.9, 1.0);
+		if (beat < 48.0)
+		{
+			color = vec3(0.9, 0.9, 1.0);
+		}
+		else
+		{
+			float kack = 0.8 - abs(rayDirection.y * 0.3 - 0.14) * 1.5;
+			color = vec3(kack, kack, 1.0);
+		}
 	}
 	else
 	{
@@ -412,7 +588,16 @@ vec2 normalizeScreenCoords(vec2 resolution, vec2 fragCoord)
 
 vec3 getCameraRayDirection(vec2 uv)
 {
-	vec3 forward = normalize(iCameraLookAt - iCameraPosition);
+	vec3 forward;
+	float beat = beat(iTime);
+	if ((beat < 48.0 || beat > 80.0) && beat < 112.0)
+	{
+		forward = normalize(iCameraLookAt - iCameraPosition);
+	}
+	else
+	{
+		forward = normalize(pit(vec3(0.0, 0.0, -24.0), iTime) - pit(vec3(0.0, 0.0, -25.0), iTime));
+	}
 	vec3 right = normalize(cross(vec3(0.0, 1.0, 0.0), forward));
 	vec3 up = normalize(cross(forward, right));
 	return normalize(uv.x * right + uv.y * up + forward * 2.0);
