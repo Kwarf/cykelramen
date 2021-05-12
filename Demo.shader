@@ -5,6 +5,7 @@ uniform vec3 iCameraPosition;
 uniform vec3 iCameraLookAt;
 uniform vec3 iBallPosition;
 uniform sampler2D iPrecalcTexture;
+uniform int iIterations;
 
 const float PRECALC_TIME = (1.0 / 60.0) * 256.0;
 const float BPM = 175.0;
@@ -20,6 +21,15 @@ vec3 rgb(int r, int g, int b)
 		, float(g) / 255.0
 		, float(b) / 255.0
 	);
+}
+
+vec3 bikeColor(int idx)
+{
+	if (idx < 1) { return rgb(30,144,255); }
+	if (idx < 2) { return rgb(60,179,113); }
+	if (idx < 3) { return rgb(178,34,34); }
+	if (idx < 4) { return rgb(64,79,36); }
+	return rgb(0,139,139);
 }
 
 void pR(inout vec2 p, float a)
@@ -113,6 +123,25 @@ float sdRoundBox(vec3 p, vec3 b, float r)
 	return length(max(q,0.0)) + min(max(q.x,max(q.y,q.z)),0.0) - r;
 }
 
+float sdSphere(vec3 p, float s)
+{
+	return length(p)-s;
+}
+
+float sdRoundCone(vec3 p, float r1, float r2, float h)
+{
+	vec2 q = vec2( length(p.xz), p.y );
+
+	float b = (r1-r2)/h;
+	float a = sqrt(1.0-b*b);
+	float k = dot(q,vec2(-b,a));
+
+	if( k < 0.0 ) return length(q) - r1;
+	if( k > a*h ) return length(q-vec2(0.0,h)) - r2;
+
+	return dot(q, vec2(a,b) ) - r1;
+}
+
 // 3D primitives (custom)
 
 float sdTube(vec3 p, float d, float t, float h)
@@ -157,40 +186,35 @@ float sdBikeFrame(vec3 pos)
 {
 	float t = 1e10;
 	pos += vec3(0.0, -0.035, 0.0);
-	// Bounding box culling. Worth it? Who knows. Increased FPS from ~420 to ~640 when the frame took up maybe 1/10th of the frame.
-	vec3 p = pos + vec3(0.12, -0.24, 0.0);
-	if (sdBox(p, vec3(0.55, 0.28, 0.06)) < t)
-	{
-		// Seat tube
-		p = pos;
-		pR(p.yz, radians(90));
-		p += vec3(0.0, 0.0, 0.02);
-		t = sdTube(p, 0.04, 0.003, 0.5);
+	// Seat tube
+	vec3 p = pos;
+	pR(p.yz, radians(90));
+	p += vec3(0.0, 0.0, 0.02);
+	t = sdTube(p, 0.04, 0.003, 0.5);
 
-		// Crank tube
-		p = pos + vec3(0.0, 0.0, -0.035);
-		t = fOpUnionRound(t, sdTube(p, 0.06, 0.005, 0.07), 0.02);
+	// Crank tube
+	p = pos + vec3(0.0, 0.0, -0.035);
+	t = fOpUnionRound(t, sdTube(p, 0.06, 0.005, 0.07), 0.02);
 
-		// Top tube
-		p = pos + vec3(0.32, -0.45, 0.0);
-		pR(p.xy, radians(90));
-		t = fOpUnionRound(t, sdCylinder(p * vec3(1.3, 1.0, 1.0), vec2(0.02, 0.3)), 0.015);
+	// Top tube
+	p = pos + vec3(0.32, -0.45, 0.0);
+	pR(p.xy, radians(90));
+	t = fOpUnionRound(t, sdCylinder(p * vec3(1.3, 1.0, 1.0), vec2(0.02, 0.3)), 0.015);
 
-		// Bottom tube
-		p = pos + vec3(0.33, -0.21, 0.0);
-		pR(p.xz, radians(90));
-		pR(p.yz, radians(58));
-		t = fOpUnionRound(t, sdCylinder(p, vec2(0.023, 0.36)), 0.02);
+	// Bottom tube
+	p = pos + vec3(0.33, -0.21, 0.0);
+	pR(p.xz, radians(90));
+	pR(p.yz, radians(58));
+	t = fOpUnionRound(t, sdCylinder(p, vec2(0.023, 0.36)), 0.02);
 
-		// Head tube
-		p = pos + vec3(0.66, -0.365, 0.0);
-		pR(p.yz, radians(90));
-		pR(p.xz, radians(8));
-		t = fOpUnionRound(t, sdTube(p, 0.05, 0.005, 0.13), 0.015);
+	// Head tube
+	p = pos + vec3(0.66, -0.365, 0.0);
+	pR(p.yz, radians(90));
+	pR(p.xz, radians(8));
+	t = fOpUnionRound(t, sdTube(p, 0.05, 0.005, 0.13), 0.015);
 
-		// Whatever the wheel holding thingies (wht™) are called
-		t = fOpUnionRound(t, sdSubFrame(pos), 0.01);
-	}
+	// Whatever the wheel holding thingies (wht™) are called
+	t = fOpUnionRound(t, sdSubFrame(pos), 0.01);
 
 	return t;
 }
@@ -218,6 +242,20 @@ vec4 sdTableMat(vec3 pos)
 	return opMinColored(pins, ropes);
 }
 
+vec4 sdTinyMat(vec3 pos)
+{
+	pos -= vec3(0.0, 0.165, 0.0);
+	vec3 p = pos + vec3(0.0, -0.02, 0.0);
+	p = opRepLim(p, 0.05, vec3(17.0, 0.0, 0.0));
+	vec4 pins = vec4(rgb(160, 82, 45), sdRoundBox(p, vec3(0.01, 0.01, 0.88), 0.01));
+
+	p = pos + vec3(0.0, -0.03, 0.0);
+	p = opRepLim(p, 0.8, vec3(0.0, 0.0, 1.0));
+	vec4 ropes = vec4(rgb(245, 222, 179), sdRoundBox(p, vec3(0.88, 0.01, 0.01), 0.01));
+
+	return opMinColored(pins, ropes);
+}
+
 float sdChopsticks(vec3 pos)
 {
 	vec3 p = pos;
@@ -227,23 +265,44 @@ float sdChopsticks(vec3 pos)
 	return t;
 }
 
+vec4 egg(vec3 pos)
+{
+	float egg = sdRoundCone(pos, 0.1, 0.07, 0.07);
+	float eggSplitter = sdBox(pos-vec3(0.06, 0.0, 0.0), vec3(0.06, 0.3, 0.2));
+	egg = max(egg, -eggSplitter);
+	float yolk = sdSphere(pos, 0.05);
+	yolk = max(yolk, -eggSplitter);
+	return opMinColored(vec4(vec3(1.0), egg), vec4(rgb(249, 208, 16), yolk));
+}
+
 vec4 showcase(vec3 pos)
 {
-	float box = sdRoundBox(pos, vec3(0.8, 0.1, 0.8), 0.1);
-	vec4 obj = vec4(1.0, 1.0, 1.0, box);
+	vec4 obj = sdTinyMat(pos);
 
-	vec3 p = pos - vec3(0.0, 0.2, 0.0);
-	pR(p.xy, radians(-12));
+	vec3 p = pos - vec3(0.375, 0.5, -0.1);
+	pR(p.xy, radians(12));
+	pR(p.xz, radians(45));
+	pR(p.yz, radians(35));
+	pR(p.xz, radians(-45));
 	obj = opMinColored(obj, vec4(1.0, 0.0, 0.0, sdBikeFrame(p)));
 
-	p = pos - vec3(0.2, 0.2 + 0.01, -0.5);
+	p = pos - vec3(0.0, 0.46, 0.0);
+	pR(p.xy, radians(-12));
+	pR(p.yz, radians(65));
+	p.x += 0.02;
+	obj = opMinColored(obj, vec4(0.0, 1.0, 0.0, sdBikeFrame(p)));
+
+	p = pos - vec3(0.2, 0.2 + 0.02, -0.5);
 	pR(p.xz, radians(-60));
 	float chopz = sdChopsticks(p);
-	p -= vec3(0.1, 0.04, 0.0);
-	pR(p.yz, radians(3.5));
+	p -= vec3(0.1, 0.03, 0.0);
+	pR(p.yz, radians(2.3));
 	pR(p.xz, radians(-15));
 	chopz = min(chopz, sdChopsticks(p));
 	obj = opMinColored(obj, vec4(rgb(205,133,63), chopz));
+
+	p = pos - vec3(0.0, 0.2, 0.0);
+	obj = opMinColored(obj, vec4(0.9, 0.9, 0.9, sdBowl(p / 0.6) * 0.6));
 
 	return obj;
 }
@@ -261,34 +320,34 @@ vec3 pit(vec3 p, float time) // PositionInTunnel™
 
 float sdTunnel(vec3 pos)
 {
-	vec3 p = pit(pos - vec3(0.0, 2.0, (iTime - 17.0) * -25.0), iTime);
+	vec3 p = pit(pos - vec3(0.0, 0.0, (iTime - 16.45) * -25.0), iTime);
 
 	// Revolve
 	pModPolar(p.xy, 7);
-	p -= vec3(6.0, 0.0, 0.0);
+	p -= vec3(7.0, 0.0, 0.0);
 	pR(p.xy, radians(90));
 
 	// Repeat
 	p = opRep(p, vec3(0.0, 0.0, 1.6));
 
 	// float t = sdBox(p, vec3(1.8, 0.2, 0.2+punch(iTime))); // <-- TODO: I like dis, next scene pls
-	float t = sdBox(p, vec3(1.8+1.0*punch(iTime), 0.2, 0.2));
+	float t = sdBox(p, vec3(2.0+1.6*punch(iTime), 0.2, 0.2));
 	return t;
 }
 
 float sdSecondTunnel(vec3 pos)
 {
-	vec3 p = pit(pos - vec3(0.0, 2.0, (iTime - 17.0) * -25.0), iTime);
+	vec3 p = pit(pos - vec3(0.0, 2.0, (iTime - 38.40) * -25.0), iTime);
 
 	// Revolve
 	pModPolar(p.xy, 7);
-	p -= vec3(6.0, 0.0, 0.0);
+	p -= vec3(7.0, 0.0, 0.0);
 	pR(p.xy, radians(90));
 
 	// Repeat
 	p = opRep(p, vec3(0.0, 0.0, 1.6));
 
-	float t = sdBox(p, vec3(1.8, 0.2, 0.2+punch(iTime)*0.7));
+	float t = sdBox(p, vec3(2.0, 0.2, 0.2+punch(iTime)*0.7));
 	return t;
 }
 
@@ -298,14 +357,22 @@ vec4 dinerScene(vec3 pos)
 	vec4 obj = vec4(0.2, 0.2, 0.2, sdRoundBox(pos+vec3(0.0, 0.08, 0.0), vec3(10.0, 0.03, 1.4), 0.05));
 	obj = opMinColored(obj, vec4(0.2, 0.2, 0.4, sdRoundBox(pos-vec3(0.0, 1.5, 1.5), vec3(10.0, 3.0, 0.03), 0.05)));
 	obj = opMinColored(obj, vec4(0.4, 0.2, 0.2, sdRoundBox(pos-vec3(0.0, 2.5, 1.3), vec3(10.0, 0.7, 0.03), 0.05)));
-	obj = opMinColored(obj, vec4(0.8, 0.8, 1.0, sdRoundBox(pos-vec3(0.0, 2.5, 0.3), vec3(0.7, 0.6, 1.0), 0.1)));
+	// Dispenser, share color with bowl to reduce if calls
+	float shake = iTime < 6.78 // Increasing vibration between 4.11 and 6.78 seconds
+		? max(0.0, (iTime - 4.11) * 0.01)
+		: 0.0; 
+	float dnb = sdRoundBox(pos-vec3(0.0, 2.5, 0.3)+(shake*vec3(sin(iTime*150.0), cos(iTime*200.0), 0.0)), vec3(0.7, 0.6, 1.0), 0.1);
 
 	// Bikes
-	if (iTime > 6.0 && sdBox(pos-vec3(0.0, 0.95, 0.0), vec3(1.0, 0.9, 1.0)) < 1e10) // 111 -> 134 FPS (540p)
+	float beat = beat(iTime);
+	if (iTime > 6.0 && sdCylinder(pos-vec3(0.0, 0.95, 0.0), vec2(0.9)) < 1e10) // 111 -> 134 FPS (540p)
 	{
 		float sampleRow = min((iTime - 6.0) / PRECALC_TIME, 1.0);
-		float dBikes = 1e10;
 		float precalcWidth = float(textureSize(iPrecalcTexture, 0).x);
+		float cut = sdBox(pos-vec3(0.0, 7.8, 0.3), vec3(2.0, 6.0, 2.0));
+		float s = beat >= 32.0
+			? 1.0 + punch(iTime) * 0.05
+			: 1.0;
 		for (int i = 0; i < 5; i++)
 		{
 			float offs = float(i) * 4.0;
@@ -315,42 +382,41 @@ vec4 dinerScene(vec3 pos)
 				, texture(iPrecalcTexture, vec2((offs + 2.0) / precalcWidth, sampleRow)).xyz
 				, texture(iPrecalcTexture, vec2((offs + 3.0) / precalcWidth, sampleRow)).xyz
 			);
-			dBikes = min(dBikes, sdBikeFrame(bikeTranslation * (pos - bikePosition)));
+			// Cut / clip / w/e
+			float bike = max(-cut, sdBikeFrame(bikeTranslation * (pos - bikePosition) / s) * s);
+			obj = opMinColored(obj, vec4(bikeColor(i), bike));
 		}
-
-		// Cut / clip / w/e
-		dBikes = max(-sdBox(pos-vec3(0.0, 7.8, 0.3), vec3(2.0, 6.0, 2.0)), dBikes);
-
-		obj = opMinColored(obj, vec4(0.2, 0.9, 0.9, dBikes));
 	}
 
 	// Bowl
-	float beat = beat(iTime);
 	if (beat >= 16.0 && beat < 17.0)
 	{
 		// Tease the bowl
 		float bowl = sdBox(pos - vec3(0.0, 1.0 - punch(iTime), 0.0), vec3(1.0, 0.05, 1.0));
 		bowl = max(bowl, sdBowl(pos));
-		obj = opMinColored(obj, vec4(0.9, 0.9, 0.9, bowl));
+		dnb = min(dnb, bowl);
 	}
 	else if (beat >= 18.0 && beat < 19.0)
 	{
 		// Whoop the bowl
 		float bowl = sdBox(pos - vec3(0.0, 1.5 - punch(iTime), 0.0), vec3(1.0, 0.6, 1.0));
 		bowl = max(-bowl, sdBowl(pos));
-		obj = opMinColored(obj, vec4(0.9, 0.9, 0.9, bowl));
+		dnb = min(dnb, bowl);
 	}
 	else if (beat >= 19.0 && beat < 32.0)
 	{
 		// Show the bowl
-		obj = opMinColored(obj, vec4(0.9, 0.9, 0.9, sdBowl(pos)));
+		dnb = min(dnb, sdBowl(pos));
 	}
 	else if (beat >= 32.0)
 	{
 		// Boop the bowl
-		vec3 p = pos * (1.0 + punch(iTime) * -0.05);
-		obj = opMinColored(obj, vec4(0.9, 0.9, 0.9, sdBowl(p)));
+		float s = 1.0 + punch(iTime) * 0.05;
+		dnb = min(dnb, sdBowl(pos / s) * s);
 	}
+
+	// Out the dispenser and bowl
+	obj = opMinColored(obj, vec4(0.9, 0.9, 0.9, dnb));
 
 	// Chopstick
 	if (iTime >= 3.0)
@@ -389,7 +455,6 @@ vec4 dinerScene(vec3 pos)
 		obj = opMinColored(obj, sdTableMat(pos));
 	}
 
-	// Table mat
 	return obj;
 }
 
@@ -398,19 +463,27 @@ vec4 tunnelScene(vec3 pos)
 	float tunnel = sdTunnel(pos);
 	vec4 obj = vec4(rgb(64,127,255), tunnel);
 
-	vec3 p = pos - vec3(sin(iTime)*0.5, 2.0+cos(iTime)*0.5, -1.0);
+	vec3 p = pos - vec3(0.0, 0.0, -18.0);
 	pR(p.xz, cos(iTime*4.5)*2.3);
 	pR(p.xy, sin(iTime*3.3)*1.8);
 	pR(p.yz, -sin(iTime*1.3)*4.6);
 	p += vec3(0.0, 0.25, 0.0);
 	obj = opMinColored(obj, vec4(1.0, 0.0, 0.0, sdBikeFrame(p)));
 
-	p = pos - vec3(cos(iTime)*0.8, 2.0+sin(iTime)*0.8, 4.0);
+	p = pos - vec3(cos(iTime)*0.8, 2.0+sin(iTime)*0.8, -14.0);
 	pR(p.xz, cos(iTime*1.4)*1.6);
 	pR(p.xy, sin(iTime*1.2)*2.7);
 	pR(p.yz, -sin(iTime*1.7)*3.5);
 	p += vec3(0.0, 0.5, 0.0);
 	obj = opMinColored(obj, vec4(0.9, 0.9, 0.9, sdBowl(p)));
+
+	p = pos - vec3(0.0, 0.0, -18.0);
+	pR(p.xz, cos(iTime*1.8)*1.8);
+	pR(p.xy, sin(iTime*1.6)*1.3);
+	pR(p.yz, -sin(iTime*1.2)*2.5);
+	float chopz = sdChopsticks(p - vec3(1.2, 0.08, -0.2));
+	chopz = min(chopz, sdChopsticks(p - vec3(1.249, 0.08, -0.2)));
+	obj = opMinColored(obj, vec4(rgb(205,133,63), chopz));
 
 	return obj;
 }
@@ -421,18 +494,19 @@ vec4 flatScene(vec3 pos)
 	float beat = beat(iTime);
 	if (beat > 104.0)
 	{
-		pModPolar(pos.xy, beat - 104.0 + punch(iTime));
-		pos -= vec3(15.0, 0.0, 0.0);
-		pR(pos.xy, radians(90));
-		pos = opRepLim(pos, 2.5, vec3(3.0, 2.0, 3.0));
+		pR(pos.xz, radians((beat-104.0)*25.0));
+		pModPolar(pos.xz, beat - 104.0 + punch(iTime));
+		pos -= vec3(14.0, 0.0, 0.0);
+		// pR(pos.xy, radians(punch(iTime)*30.0));
+		pos = opRepLim(pos, 2.5, vec3(4.0, 0.0, 4.0));
 	}
 	else if (beat > 103.0)
 	{
-		pos = opRepLim(pos, 2.5, vec3(3.0, 2.0, 3.0));
+		pos = opRepLim(pos, 2.5, vec3(4.0, 0.0, 4.0));
 	}
 	else if (beat > 102.0)
 	{
-		pos = opRepLim(pos, 2.5, vec3(3.0, 1.0, 3.0));
+		pos = opRepLim(pos, 2.5, vec3(4.0, 0.0, 3.0));
 	}
 	else if (beat > 101.0)
 	{
@@ -465,21 +539,30 @@ vec4 flatScene(vec3 pos)
 
 vec4 secondTunnelScene(vec3 pos)
 {
-	if (beat(iTime) > 128.0)
+	float beat = beat(iTime);
+	if (beat > 128.0)
 	{
+		pR(pos.yz, radians(beat*25.0));
 		pR(pos.xz, radians(90));
-		pos += vec3(12.0, 0.0, -30.0);
+		pos += vec3(0.0, 0.0, -22.0);
 	}
 
 	float tunnel = sdSecondTunnel(pos + vec3(0.0, 1.5, 0.0));
 	vec4 obj = vec4(rgb(64,127,255), tunnel);
 
-	vec3 p = pos - vec3(sin(iTime)*0.5, cos(iTime)*0.5, -25.0);
+	vec3 p = pos - vec3(sin(iTime)*0.5, cos(iTime)*0.5, -18.0);
 	pR(p.xz, cos(iTime*4.5)*2.3);
 	pR(p.xy, sin(iTime*3.3)*1.8);
-	pR(p.yz, -sin(iTime*1.3)*4.6);
+	pR(p.yz, -sin(iTime*1.3)*3.2);
 	p += vec3(0.0, 0.25, 0.0);
 	obj = opMinColored(obj, showcase(p));
+
+	return obj;
+}
+
+vec4 vocalScene(vec3 pos)
+{
+	vec4 obj = vec4(0.2, 0.2, 0.2, sdCylinder(pos, vec2(1.0, 1.0)));
 
 	return obj;
 }
@@ -487,6 +570,10 @@ vec4 secondTunnelScene(vec3 pos)
 vec4 scene(vec3 pos)
 {
 	float beat = beat(iTime);
+	if (beat >= 144.0)
+	{
+		return vocalScene(pos);
+	}
 	if (beat >= 112.0)
 	{
 		return secondTunnelScene(pos);
@@ -507,10 +594,10 @@ vec4 march(vec3 origin, vec3 direction)
 {
 	float t = 0.0;
 
-	for (int i = 0; i < 128; i++)
+	for (int i = 0; i < iIterations; i++)
 	{
 		vec4 res = scene(origin + direction * t);
-		if (res.w < (0.0001 * t))
+		if (res.w < (0.0005 * t))
 		{
 			return vec4(res.rgb, t);
 		}
@@ -590,7 +677,7 @@ vec3 getCameraRayDirection(vec2 uv)
 {
 	vec3 forward;
 	float beat = beat(iTime);
-	if ((beat < 48.0 || beat > 80.0) && beat < 112.0)
+	if (beat < 48.0 || (beat > 80.0 && beat < 112.0) || beat > 144.0)
 	{
 		forward = normalize(iCameraLookAt - iCameraPosition);
 	}
@@ -607,6 +694,18 @@ void fragment()
 {
 	vec2 uv = normalizeScreenCoords(1.0 / SCREEN_PIXEL_SIZE, FRAGCOORD.xy);
 	vec3 rayDirection = getCameraRayDirection(uv);
-	vec3 col = render(iCameraPosition, rayDirection);
+
+	vec3 cameraPosition;
+	float beat = beat(iTime);
+	if (beat < 48.0 || (beat > 80.0 && beat < 112.0) || beat > 144.0)
+	{
+		cameraPosition = iCameraPosition;
+	}
+	else
+	{
+		cameraPosition = pit(vec3(0.0, 0.0, -25.0), iTime);
+	}
+
+	vec3 col = render(cameraPosition, rayDirection);
 	COLOR = vec4(pow(col, vec3(0.4545)), 1);
 }

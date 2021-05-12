@@ -11,6 +11,7 @@ shader_param/iTime = 0.0
 shader_param/iCameraPosition = null
 shader_param/iCameraLookAt = null
 shader_param/iBallPosition = null
+shader_param/iIterations = 56
 
 [sub_resource type="GDScript" id=2]
 script/source = "extends Button
@@ -47,10 +48,10 @@ tracks/1/loop_wrap = true
 tracks/1/imported = false
 tracks/1/enabled = true
 tracks/1/keys = {
-"times": PoolRealArray( 0, 2, 17, 27.42, 32.91, 35.65, 35.9 ),
-"transitions": PoolRealArray( 1, 1, 1, 1, 1, 1, 1 ),
+"times": PoolRealArray( 0, 2, 17, 27.42, 32.9, 34.3, 35.65, 48.68 ),
+"transitions": PoolRealArray( 1, 1, 1, 1, 1, 1, 1, 1 ),
 "update": 0,
-"values": [ Vector3( 20, -55.043, 0 ), Vector3( 20, 0, 0 ), Vector3( 20, 0, 0 ), Vector3( 36.674, 0, 0 ), Vector3( 36.674, 360, 0 ), Vector3( 20, 720, 0 ), Vector3( 0, 720, 0 ) ]
+"values": [ Vector3( 20, -55.043, 0 ), Vector3( 20, 0, 0 ), Vector3( 20, 0, 0 ), Vector3( 36.674, 0, 0 ), Vector3( 36.674, 360, 0 ), Vector3( 40, 543.272, 0 ), Vector3( 90, 720, 0 ), Vector3( 20, 0, 0 ) ]
 }
 tracks/2/type = "value"
 tracks/2/path = NodePath("CameraAttachment/Camera:translation")
@@ -59,10 +60,22 @@ tracks/2/loop_wrap = true
 tracks/2/imported = false
 tracks/2/enabled = true
 tracks/2/keys = {
-"times": PoolRealArray( 0, 17, 27.42, 32.91, 35.65 ),
-"transitions": PoolRealArray( 1, 1, 1, 1, 1 ),
+"times": PoolRealArray( 0, 17, 27.42, 32.91, 35.65, 48.68 ),
+"transitions": PoolRealArray( 1, 1, 1, 1, 1, 1 ),
 "update": 0,
-"values": [ Vector3( 0, 0, -4.8 ), Vector3( 0, 0, -4.8 ), Vector3( 0, 0, -2 ), Vector3( 0, 0, -4.5 ), Vector3( 0, 0, -30 ) ]
+"values": [ Vector3( 0, 0, -4.8 ), Vector3( 0, 0, -4.8 ), Vector3( 0, 0, -2 ), Vector3( 0, 0, -4.5 ), Vector3( 0, 0, -30 ), Vector3( 0, 0, -4.8 ) ]
+}
+tracks/3/type = "value"
+tracks/3/path = NodePath("MarchTarget:material:shader_param/iIterations")
+tracks/3/interp = 1
+tracks/3/loop_wrap = true
+tracks/3/imported = false
+tracks/3/enabled = true
+tracks/3/keys = {
+"times": PoolRealArray( 0, 35.65 ),
+"transitions": PoolRealArray( 1, 1 ),
+"update": 1,
+"values": [ 64, 56 ]
 }
 
 [node name="Spatial" type="Spatial"]
@@ -71,10 +84,10 @@ __meta__ = {
 }
 
 [node name="CameraAttachment" type="Position3D" parent="."]
-transform = Transform( 1, 1.19601e-07, 3.28602e-07, 0, 0.939693, -0.34202, -3.49691e-07, 0.34202, 0.939692, 0, 0, 0 )
+transform = Transform( 1, 0, 0, 0, 0.939693, -0.34202, 0, 0.34202, 0.939692, 0, 0, 0 )
 
 [node name="Camera" type="Position3D" parent="CameraAttachment"]
-transform = Transform( 1, 0, 0, 7.10543e-15, 1, 0, 1.84741e-13, 0, 1, 0, 0, -30 )
+transform = Transform( 1, 0, 0, 7.10543e-15, 1, 0, 1.84741e-13, 0, 1, 0, 0, -4.8 )
 
 [node name="Target" type="Spatial" parent="CameraAttachment/Camera"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 1 )
