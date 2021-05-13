@@ -49,7 +49,7 @@ tracks/0/loop_wrap = true
 tracks/0/imported = false
 tracks/0/enabled = true
 tracks/0/keys = {
-"times": PoolRealArray( 0, 2, 17, 27.42, 48.3, 48.68, 60.34, 65.82 ),
+"times": PoolRealArray( 0, 2, 17, 27.42, 48.3, 49.37, 60.34, 65.82 ),
 "transitions": PoolRealArray( 1, 1, 1, 1, 1, 1, 1, 1 ),
 "update": 0,
 "values": [ Vector3( 6.58158, 1.5, 0 ), Vector3( 0, 1.5, 0 ), Vector3( 0, 1.5, 0 ), Vector3( 0, 0, 0 ), Vector3( 0, 0, 0 ), Vector3( 0, 0.5, 0 ), Vector3( 0, 0.5, 0 ), Vector3( 0, 0.113562, 2.39096 ) ]
@@ -61,7 +61,7 @@ tracks/1/loop_wrap = true
 tracks/1/imported = false
 tracks/1/enabled = true
 tracks/1/keys = {
-"times": PoolRealArray( 0, 2, 17, 27.42, 32.9, 34.3, 35.65, 48.68, 54.85, 60.34 ),
+"times": PoolRealArray( 0, 2, 17, 27.42, 32.9, 34.3, 35.65, 49.37, 54.85, 60.34 ),
 "transitions": PoolRealArray( 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 ),
 "update": 0,
 "values": [ Vector3( 20, -55.043, 0 ), Vector3( 20, 0, 0 ), Vector3( 20, 0, 0 ), Vector3( 36.674, 0, 0 ), Vector3( 36.674, 360, 0 ), Vector3( 40, 543.272, 0 ), Vector3( 90, 720, 0 ), Vector3( 20, 0, 0 ), Vector3( 10, 0, 0 ), Vector3( 10, 720, 0 ) ]
@@ -85,10 +85,10 @@ tracks/3/loop_wrap = true
 tracks/3/imported = false
 tracks/3/enabled = true
 tracks/3/keys = {
-"times": PoolRealArray( 0, 35.65 ),
-"transitions": PoolRealArray( 1, 1 ),
+"times": PoolRealArray( 0, 35.65, 38.4, 49.37 ),
+"transitions": PoolRealArray( 1, 1, 1, 1 ),
 "update": 1,
-"values": [ 64, 56 ]
+"values": [ 64, 56, 48, 64 ]
 }
 tracks/4/type = "value"
 tracks/4/path = NodePath("Fin/Top:anchor_bottom")
@@ -147,7 +147,7 @@ __meta__ = {
 }
 
 [node name="CameraAttachment" type="Position3D" parent="."]
-transform = Transform( 1, 0, 0, 0, 0.939692, -0.34202, 0, 0.34202, 0.939693, 0, 1.5, 0 )
+transform = Transform( 0.572962, -0.280313, -0.770156, 0, 0.939692, -0.34202, 0.819582, 0.195964, 0.538408, 6.58158, 1.5, 0 )
 
 [node name="Camera" type="Position3D" parent="CameraAttachment"]
 transform = Transform( 1, 1.86265e-09, 7.45058e-09, -1.86265e-09, 1, -2.98023e-08, 7.45058e-09, 0, 1, 0, 0, -4.8 )
