@@ -244,7 +244,7 @@ vec4 vocalScene(vec3 pos)
 	pR(p.xz, radians(spin));
 	p.x += 0.3;
 	pR(p.xy, radians(-13));
-	obj = opMinColored(obj, vec4(1.0, 0.0, 0.0, sdBikeFrame(p / 1.5) * 1.5));
+	obj = opMinColored(obj, vec4(rgb(42, 183, 227), sdBikeFrame(p / 1.5) * 1.5));
 
 	if (beat > 152.0)
 	{
@@ -291,7 +291,7 @@ vec4 morphScene(vec3 pos)
     vec3  q = vec3(m*p.xy,p.z);
 	pR(q.yz, radians(-25));
 	pR(q.xy, radians(10));
-	vec4 obj = vec4(1.0, 0.0, 0.0, sdBikeFrame(q));
+	vec4 obj = vec4(rgb(255, 16, 32), sdBikeFrame(q));
 
 	if (beat > 168.0)
 	{

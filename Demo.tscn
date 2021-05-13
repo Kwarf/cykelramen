@@ -32,15 +32,14 @@ func _input(event):
 		_pressed()
 "
 
-[sub_resource type="ShaderMaterial" id=4]
+[sub_resource type="ShaderMaterial" id=3]
 shader = ExtResource( 5 )
 shader_param/iTime = null
 shader_param/iCameraPosition = null
 shader_param/iCameraLookAt = null
 shader_param/iBallPosition = null
 
-[sub_resource type="Animation" id=3]
-resource_name = "Demo"
+[sub_resource type="Animation" id=4]
 length = 70.0
 tracks/0/type = "value"
 tracks/0/path = NodePath("CameraAttachment:translation")
@@ -191,7 +190,7 @@ __meta__ = {
 }
 
 [node name="MarchTargetDisc2" type="ColorRect" parent="."]
-material = SubResource( 4 )
+material = SubResource( 3 )
 anchor_right = 1.0
 anchor_bottom = 1.0
 mouse_filter = 2
@@ -221,6 +220,6 @@ anchor_bottom = 1.0
 color = Color( 0, 0, 0, 1 )
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="."]
-anims/Demo = SubResource( 3 )
+anims/Demo = SubResource( 4 )
 
 [node name="Precalc" parent="." instance=ExtResource( 3 )]

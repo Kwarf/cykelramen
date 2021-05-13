@@ -25,11 +25,11 @@ vec3 rgb(int r, int g, int b)
 
 vec3 bikeColor(int idx)
 {
-	if (idx < 1) { return rgb(30,144,255); }
-	if (idx < 2) { return rgb(60,179,113); }
-	if (idx < 3) { return rgb(178,34,34); }
-	if (idx < 4) { return rgb(64,79,36); }
-	return rgb(0,139,139);
+	if (idx < 1) { return rgb(33, 194, 28); }
+	if (idx < 2) { return rgb(42, 183, 227); }
+	if (idx < 3) { return rgb(255, 235, 89); }
+	if (idx < 4) { return rgb(254,42,124); }
+	return rgb(255, 16, 32);
 }
 
 void pR(inout vec2 p, float a)
@@ -260,13 +260,13 @@ vec4 showcase(vec3 pos)
 	pR(p.xz, radians(45));
 	pR(p.yz, radians(35));
 	pR(p.xz, radians(-45));
-	obj = opMinColored(obj, vec4(1.0, 0.0, 0.0, sdBikeFrame(p)));
+	obj = opMinColored(obj, vec4(bikeColor(1), sdBikeFrame(p)));
 
 	p = pos - vec3(0.0, 0.46, 0.0);
 	pR(p.xy, radians(-12));
 	pR(p.yz, radians(65));
 	p.x += 0.02;
-	obj = opMinColored(obj, vec4(0.0, 1.0, 0.0, sdBikeFrame(p)));
+	obj = opMinColored(obj, vec4(bikeColor(4), sdBikeFrame(p)));
 
 	p = pos - vec3(0.2, 0.2 + 0.02, -0.5);
 	pR(p.xz, radians(-60));
@@ -329,9 +329,9 @@ float sdSecondTunnel(vec3 pos)
 vec4 dinerScene(vec3 pos)
 {
 	// Table
-	vec4 obj = vec4(0.2, 0.2, 0.2, sdRoundBox(pos+vec3(0.0, 0.08, 0.0), vec3(10.0, 0.03, 1.4), 0.05));
-	obj = opMinColored(obj, vec4(0.2, 0.2, 0.4, sdRoundBox(pos-vec3(0.0, 1.5, 1.5), vec3(10.0, 3.0, 0.03), 0.05)));
-	obj = opMinColored(obj, vec4(0.4, 0.2, 0.2, sdRoundBox(pos-vec3(0.0, 2.5, 1.3), vec3(10.0, 0.7, 0.03), 0.05)));
+	vec4 obj = vec4(vec3(0.2), sdRoundBox(pos+vec3(0.0, 0.08, 0.0), vec3(10.0, 0.03, 1.4), 0.05));
+	obj = opMinColored(obj, vec4(0.3, 0.5, 0.7, sdRoundBox(pos-vec3(0.0, 1.5, 1.5), vec3(10.0, 3.0, 0.03), 0.05)));
+	obj = opMinColored(obj, vec4(0.4, 0.7, 0.2, sdRoundBox(pos-vec3(0.0, 2.5, 1.3), vec3(10.0, 0.7, 0.03), 0.05)));
 	// Dispenser, share color with bowl to reduce if calls
 	float shake = iTime < 6.78 // Increasing vibration between 4.11 and 6.78 seconds
 		? max(0.0, (iTime - 4.11) * 0.01)
@@ -443,7 +443,7 @@ vec4 tunnelScene(vec3 pos)
 	pR(p.xy, sin(iTime*3.3)*1.8);
 	pR(p.yz, -sin(iTime*1.3)*4.6);
 	p += vec3(0.0, 0.25, 0.0);
-	obj = opMinColored(obj, vec4(1.0, 0.0, 0.0, sdBikeFrame(p)));
+	obj = opMinColored(obj, vec4(bikeColor(4), sdBikeFrame(p / 1.7) * 1.7));
 
 	p = pos - vec3(cos(iTime)*0.8, 2.0+sin(iTime)*0.8, -14.0);
 	pR(p.xz, cos(iTime*1.4)*1.6);
