@@ -128,20 +128,6 @@ float sdSphere(vec3 p, float s)
 	return length(p)-s;
 }
 
-float sdRoundCone(vec3 p, float r1, float r2, float h)
-{
-	vec2 q = vec2( length(p.xz), p.y );
-
-	float b = (r1-r2)/h;
-	float a = sqrt(1.0-b*b);
-	float k = dot(q,vec2(-b,a));
-
-	if( k < 0.0 ) return length(q) - r1;
-	if( k > a*h ) return length(q-vec2(0.0,h)) - r2;
-
-	return dot(q, vec2(a,b) ) - r1;
-}
-
 // 3D primitives (custom)
 
 float sdTube(vec3 p, float d, float t, float h)
@@ -265,16 +251,6 @@ float sdChopsticks(vec3 pos)
 	return t;
 }
 
-vec4 egg(vec3 pos)
-{
-	float egg = sdRoundCone(pos, 0.1, 0.07, 0.07);
-	float eggSplitter = sdBox(pos-vec3(0.06, 0.0, 0.0), vec3(0.06, 0.3, 0.2));
-	egg = max(egg, -eggSplitter);
-	float yolk = sdSphere(pos, 0.05);
-	yolk = max(yolk, -eggSplitter);
-	return opMinColored(vec4(vec3(1.0), egg), vec4(rgb(249, 208, 16), yolk));
-}
-
 vec4 showcase(vec3 pos)
 {
 	vec4 obj = sdTinyMat(pos);
@@ -330,7 +306,6 @@ float sdTunnel(vec3 pos)
 	// Repeat
 	p = opRep(p, vec3(0.0, 0.0, 1.6));
 
-	// float t = sdBox(p, vec3(1.8, 0.2, 0.2+punch(iTime))); // <-- TODO: I like dis, next scene pls
 	float t = sdBox(p, vec3(2.0+1.6*punch(iTime), 0.2, 0.2));
 	return t;
 }
@@ -560,20 +535,9 @@ vec4 secondTunnelScene(vec3 pos)
 	return obj;
 }
 
-vec4 vocalScene(vec3 pos)
-{
-	vec4 obj = vec4(0.2, 0.2, 0.2, sdCylinder(pos, vec2(1.0, 1.0)));
-
-	return obj;
-}
-
 vec4 scene(vec3 pos)
 {
 	float beat = beat(iTime);
-	if (beat >= 144.0)
-	{
-		return vocalScene(pos);
-	}
 	if (beat >= 112.0)
 	{
 		return secondTunnelScene(pos);
@@ -692,20 +656,27 @@ vec3 getCameraRayDirection(vec2 uv)
 
 void fragment()
 {
-	vec2 uv = normalizeScreenCoords(1.0 / SCREEN_PIXEL_SIZE, FRAGCOORD.xy);
-	vec3 rayDirection = getCameraRayDirection(uv);
-
-	vec3 cameraPosition;
-	float beat = beat(iTime);
-	if (beat < 48.0 || (beat > 80.0 && beat < 112.0) || beat > 144.0)
+	if (iTime > 49.37)
 	{
-		cameraPosition = iCameraPosition;
+		discard;
 	}
 	else
 	{
-		cameraPosition = pit(vec3(0.0, 0.0, -25.0), iTime);
-	}
+		vec2 uv = normalizeScreenCoords(1.0 / SCREEN_PIXEL_SIZE, FRAGCOORD.xy);
+		vec3 rayDirection = getCameraRayDirection(uv);
 
-	vec3 col = render(cameraPosition, rayDirection);
-	COLOR = vec4(pow(col, vec3(0.4545)), 1);
+		vec3 cameraPosition;
+		float beat = beat(iTime);
+		if (beat < 48.0 || (beat > 80.0 && beat < 112.0) || beat > 144.0)
+		{
+			cameraPosition = iCameraPosition;
+		}
+		else
+		{
+			cameraPosition = pit(vec3(0.0, 0.0, -25.0), iTime);
+		}
+
+		vec3 col = render(cameraPosition, rayDirection);
+		COLOR = vec4(pow(col, vec3(0.4545)), 1);
+	}	
 }

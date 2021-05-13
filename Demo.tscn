@@ -1,9 +1,10 @@
-[gd_scene load_steps=8 format=2]
+[gd_scene load_steps=10 format=2]
 
 [ext_resource path="res://Demo.shader" type="Shader" id=1]
 [ext_resource path="res://Demo.gd" type="Script" id=2]
 [ext_resource path="res://Precalc.tscn" type="PackedScene" id=3]
 [ext_resource path="res://assets/Cykelramen.ogg" type="AudioStream" id=4]
+[ext_resource path="res://DemoDisc2.shader" type="Shader" id=5]
 
 [sub_resource type="ShaderMaterial" id=1]
 shader = ExtResource( 1 )
@@ -17,14 +18,26 @@ shader_param/iIterations = 56
 script/source = "extends Button
 
 func _pressed():
-	print(\"Reloading shader\")
-	var loaded = ResourceLoader.load(\"Demo.shader\", \"Shader\", true)
-	get_parent().material.shader = loaded
+	if get_parent().pause_time < 49.37:
+		print(\"Reloading disc 1 shader\")
+		var loaded = ResourceLoader.load(\"Demo.shader\", \"Shader\", true)
+		get_parent().material.shader = loaded
+	else:
+		print(\"Reloading disc 2 shader\")
+		var loaded = ResourceLoader.load(\"DemoDisc2.shader\", \"Shader\", true)
+		get_parent().get_parent().find_node(\"MarchTargetDisc2\").material.shader = loaded
 
 func _input(event):
 	if event is InputEventKey and event.pressed and event.get_scancode_with_modifiers() == (KEY_MASK_CTRL | KEY_R):
 		_pressed()
 "
+
+[sub_resource type="ShaderMaterial" id=4]
+shader = ExtResource( 5 )
+shader_param/iTime = null
+shader_param/iCameraPosition = null
+shader_param/iCameraLookAt = null
+shader_param/iBallPosition = null
 
 [sub_resource type="Animation" id=3]
 resource_name = "Demo"
@@ -36,10 +49,10 @@ tracks/0/loop_wrap = true
 tracks/0/imported = false
 tracks/0/enabled = true
 tracks/0/keys = {
-"times": PoolRealArray( 0, 2, 17, 27.42 ),
-"transitions": PoolRealArray( 1, 1, 1, 1 ),
+"times": PoolRealArray( 0, 2, 17, 27.42, 48.3, 48.68 ),
+"transitions": PoolRealArray( 1, 1, 1, 1, 1, 1 ),
 "update": 0,
-"values": [ Vector3( 6.58158, 1.5, 0 ), Vector3( 0, 1.5, 0 ), Vector3( 0, 1.5, 0 ), Vector3( 0, 0, 0 ) ]
+"values": [ Vector3( 6.58158, 1.5, 0 ), Vector3( 0, 1.5, 0 ), Vector3( 0, 1.5, 0 ), Vector3( 0, 0, 0 ), Vector3( 0, 0, 0 ), Vector3( 0, 0.5, 0 ) ]
 }
 tracks/1/type = "value"
 tracks/1/path = NodePath("CameraAttachment:rotation_degrees")
@@ -60,10 +73,10 @@ tracks/2/loop_wrap = true
 tracks/2/imported = false
 tracks/2/enabled = true
 tracks/2/keys = {
-"times": PoolRealArray( 0, 17, 27.42, 32.91, 35.65, 48.68 ),
+"times": PoolRealArray( 0, 17, 27.42, 32.91, 35.65, 48.6 ),
 "transitions": PoolRealArray( 1, 1, 1, 1, 1, 1 ),
 "update": 0,
-"values": [ Vector3( 0, 0, -4.8 ), Vector3( 0, 0, -4.8 ), Vector3( 0, 0, -2 ), Vector3( 0, 0, -4.5 ), Vector3( 0, 0, -30 ), Vector3( 0, 0, -4.8 ) ]
+"values": [ Vector3( 0, 0, -4.8 ), Vector3( 0, 0, -4.8 ), Vector3( 0, 0, -2 ), Vector3( 0, 0, -4.5 ), Vector3( 0, 0, -30 ), Vector3( 0, 0, -3.5 ) ]
 }
 tracks/3/type = "value"
 tracks/3/path = NodePath("MarchTarget:material:shader_param/iIterations")
@@ -84,10 +97,10 @@ __meta__ = {
 }
 
 [node name="CameraAttachment" type="Position3D" parent="."]
-transform = Transform( 1, 0, 0, 0, 0.939693, -0.34202, 0, 0.34202, 0.939692, 0, 0, 0 )
+transform = Transform( 1, 0, 0, 0, 0.939692, -0.34202, 0, 0.34202, 0.939693, 0, 0.5, 0 )
 
 [node name="Camera" type="Position3D" parent="CameraAttachment"]
-transform = Transform( 1, 0, 0, 7.10543e-15, 1, 0, 1.84741e-13, 0, 1, 0, 0, -4.8 )
+transform = Transform( 1, 1.86265e-09, 7.45058e-09, -1.86265e-09, 1, -2.98023e-08, 7.45058e-09, 0, 1, 0, 0, -3.5 )
 
 [node name="Target" type="Spatial" parent="CameraAttachment/Camera"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 1 )
@@ -135,6 +148,15 @@ margin_left = 16.6674
 margin_top = 67.9819
 margin_right = 117.667
 margin_bottom = 91.9819
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="MarchTargetDisc2" type="ColorRect" parent="."]
+material = SubResource( 4 )
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
 __meta__ = {
 "_edit_use_anchors_": false
 }
