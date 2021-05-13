@@ -469,7 +469,7 @@ vec4 flatScene(vec3 pos)
 	float beat = beat(iTime);
 	if (beat > 104.0)
 	{
-		pR(pos.xz, radians((beat-104.0)*25.0));
+		pR(pos.xz, radians((beat-104.0)*-25.0));
 		pModPolar(pos.xz, beat - 104.0 + punch(iTime));
 		pos -= vec3(14.0, 0.0, 0.0);
 		// pR(pos.xy, radians(punch(iTime)*30.0));
