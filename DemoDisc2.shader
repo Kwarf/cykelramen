@@ -27,6 +27,17 @@ void pR(inout vec2 p, float a)
 	p = cos(a)*p + sin(a)*vec2(p.y, -p.x);
 }
 
+float pModPolar(inout vec2 p, float repetitions) {
+	float angle = 2.0*PI/repetitions;
+	float a = atan(p.y, p.x) + angle/2.;
+	float r = length(p);
+	float c = floor(a/angle);
+	a = mod(a,angle) - angle/2.;
+	p = vec2(cos(a), sin(a))*r;
+	if (abs(c) >= (repetitions/2.0)) c = abs(c);
+	return c;
+}
+
 float fOpUnionRound(float a, float b, float r)
 {
 	vec2 u = max(vec2(r - a,r - b), vec2(0));
@@ -48,6 +59,12 @@ float opExtrusion(vec3 p, float sdf, float h)
 vec4 opMinColored(vec4 a, vec4 b)
 {
 	return a.w < b.w ? a : b;
+}
+
+vec4 opMinColoredSmooth(vec4 a, vec4 b, float s)
+{
+	float i = clamp(0.5 + 0.5 * (b.w - a.w) / s, 0.0, 1.0);
+	return vec4(mix(b.rgb, a.rgb, i), mix(b.w, a.w, i) - s * i * (1.0 - i));
 }
 
 vec3 opRep(vec3 p, vec3 c)
@@ -257,9 +274,60 @@ vec4 vocalScene(vec3 pos)
 	return obj;
 }
 
+vec4 morphScene(vec3 pos)
+{
+	float punch = punch(iTime);
+	float beat = beat(iTime);
+	vec3 p = pos;
+	p += vec3(0.0, 0.0, 0.0);
+	pModPolar(p.xz, 3);
+	p -= vec3(1.0, 0.0, 0.0);
+	pR(p.xz, radians(90));
+	p += vec3(0.0, -0.1, -0.35+punch*0.2);
+	const float k = 0.7;
+    float c = cos(k*p.x);
+    float s = sin(k*p.x);
+    mat2  m = mat2(vec2(c,-s),vec2(s,c));
+    vec3  q = vec3(m*p.xy,p.z);
+	pR(q.yz, radians(-25));
+	pR(q.xy, radians(10));
+	vec4 obj = vec4(1.0, 0.0, 0.0, sdBikeFrame(q));
+
+	if (beat > 168.0)
+	{
+		obj = opMinColoredSmooth(obj, vec4(vec3(0.9), sdBowl(pos)), 0.1);
+	}
+	if (beat > 170.0)
+	{
+		p = pos;
+		pR(p.yz, radians(-30));
+		p -= vec3(0.0, 0.27, 0.6);
+		float chopz = sdChopsticks(p / 1.3) * 1.3;
+		p -= vec3(0.1, 0.03, 0.0);
+		pR(p.yz, radians(2.3));
+		pR(p.xz, radians(-15));
+		chopz = min(chopz, sdChopsticks(p / 1.3) * 1.3);
+		obj = opMinColored(obj, vec4(rgb(205,133,63), chopz));
+	}
+
+	obj = opMinColored(obj, sdTableMat(pos));
+
+	if (beat > 192.0)
+	{
+		p = pos - vec3(0.01, 0.69, -1.0);
+		float fbs = 0.07;
+		obj = opMinColored(obj, vec4(vec3(0.05), sdBikeFrame(p / fbs) * fbs));
+	}
+
+	return obj;
+}
+
 vec4 scene(vec3 pos)
 {
-	float beat = beat(iTime);
+	if (beat(iTime) >= 160.0)
+	{
+		return morphScene(pos);
+	}
 
 	return vocalScene(pos);
 }

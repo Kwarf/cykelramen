@@ -40,6 +40,9 @@ func update_material(mtl: Material) -> void:
 	mtl.set_shader_param("iCameraLookAt", invX(camera_target.global_transform.origin));
 	mtl.set_shader_param("iBallPosition", invX(ball.global_transform.origin));
 
+func quit() -> void:
+	get_tree().quit()
+
 # Seek stuff, remove for release
 func pause() -> void:
 	seek(String(elapsed))
