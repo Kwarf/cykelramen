@@ -32,9 +32,7 @@ output_latency=100
 
 window/size/width=1920
 window/size/height=1080
-window/size/resizable=false
-window/size/always_on_top=true
-window/vsync/use_vsync=false
+window/size/fullscreen=true
 
 [physics]
 
