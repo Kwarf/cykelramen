@@ -1,10 +1,11 @@
-[gd_scene load_steps=10 format=2]
+[gd_scene load_steps=11 format=2]
 
 [ext_resource path="res://Demo.shader" type="Shader" id=1]
 [ext_resource path="res://Demo.gd" type="Script" id=2]
 [ext_resource path="res://Precalc.tscn" type="PackedScene" id=3]
 [ext_resource path="res://assets/Cykelramen.ogg" type="AudioStream" id=4]
 [ext_resource path="res://DemoDisc2.shader" type="Shader" id=5]
+[ext_resource path="res://assets/cykelramen.png" type="Texture" id=6]
 
 [sub_resource type="ShaderMaterial" id=1]
 shader = ExtResource( 1 )
@@ -12,7 +13,7 @@ shader_param/iTime = 0.0
 shader_param/iCameraPosition = null
 shader_param/iCameraLookAt = null
 shader_param/iBallPosition = null
-shader_param/iIterations = 56
+shader_param/iIterations = 64
 
 [sub_resource type="GDScript" id=2]
 script/source = "extends Button
@@ -127,6 +128,18 @@ tracks/6/keys = {
 "method": "quit"
 } ]
 }
+tracks/7/type = "value"
+tracks/7/path = NodePath("Fin/TextureRect:visible")
+tracks/7/interp = 1
+tracks/7/loop_wrap = true
+tracks/7/imported = false
+tracks/7/enabled = true
+tracks/7/keys = {
+"times": PoolRealArray( 14.4, 16.45 ),
+"transitions": PoolRealArray( 1, 1 ),
+"update": 1,
+"values": [ true, false ]
+}
 
 [node name="Spatial" type="Spatial"]
 __meta__ = {
@@ -134,10 +147,10 @@ __meta__ = {
 }
 
 [node name="CameraAttachment" type="Position3D" parent="."]
-transform = Transform( 1, 6.07232e-08, 3.44379e-07, 0, 0.984807, -0.173648, -3.49691e-07, 0.173648, 0.984808, 0, 0.113562, 2.39096 )
+transform = Transform( 1, 0, 0, 0, 0.939692, -0.34202, 0, 0.34202, 0.939693, 0, 1.5, 0 )
 
 [node name="Camera" type="Position3D" parent="CameraAttachment"]
-transform = Transform( 1, 1.86265e-09, 7.45058e-09, -1.86265e-09, 1, -2.98023e-08, 7.45058e-09, 0, 1, 0, 0, -3.5 )
+transform = Transform( 1, 1.86265e-09, 7.45058e-09, -1.86265e-09, 1, -2.98023e-08, 7.45058e-09, 0, 1, 0, 0, -4.8 )
 
 [node name="Target" type="Spatial" parent="CameraAttachment/Camera"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 1 )
@@ -218,6 +231,15 @@ anchor_top = 1.0
 anchor_right = 1.0
 anchor_bottom = 1.0
 color = Color( 0, 0, 0, 1 )
+
+[node name="TextureRect" type="TextureRect" parent="Fin"]
+visible = false
+margin_left = 167.184
+margin_top = 850.628
+margin_right = 1191.18
+margin_bottom = 945.628
+rect_rotation = -45.0
+texture = ExtResource( 6 )
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="."]
 anims/Demo = SubResource( 4 )
