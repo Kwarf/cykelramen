@@ -36,3 +36,25 @@ as well as the [hg_sdf library](http://mercury.sexy/hg_sdf/) from mercury.
 I also recommend [electricsquare/raymarching-workshop](https://github.com/electricsquare/raymarching-workshop)
 as a starting point for people like me that have never written a raymarcher
 before.
+
+## Prerender
+
+1. Run on a 4k monitor.
+2. Use [apitrace/apitrace](https://github.com/apitrace/apitrace)
+to save the GL calls to a trace file.
+```
+apitrace.exe trace cykelramen.exe
+```
+3. Render images from the trace file.
+```
+apitrace.exe dump-images cykelramen.trace
+```
+4. Rename the images so they are sequential (*nnnn.png*), since ffmpeg does not support glob (on Windows?).
+5. Merge the images using ffmpeg.
+```
+ffmpeg.exe -framerate 60 -i %04d.png -c:v libx264 -r 60 -preset slow -crf 18 -pix_fmt yuv420p out.mkv
+```
+6. Insert the audio (after the precalc loader).
+```
+ffmpeg.exe -y -i out.mp4 -itsoffset 3.867 -i Cykelramen.wav -map 0:0 -map 1:0 -c:a aac -b:a 256k -c:v copy -preset slow -async 1 outwaudio.mkv
+```

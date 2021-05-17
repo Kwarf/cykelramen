@@ -8,29 +8,27 @@ onready var animation_player: AnimationPlayer = get_parent().find_node("Animatio
 onready var music_player: AudioStreamPlayer = get_parent().find_node("AudioStreamPlayer")
 onready var disc_two: ColorRect = get_parent().find_node("MarchTargetDisc2")
 
-var clear_elapsed: bool = true
+var run: bool = false
 var elapsed: float = 0
 
 # ¯\_(ツ)_/¯
 func invX(vec: Vector3) -> Vector3:
 	return vec * Vector3(-1, 1, 1)
 
-func _ready():
-	Input.set_mouse_mode(Input.MOUSE_MODE_HIDDEN)
-
 func _process(delta: float) -> void:
-	if clear_elapsed:
-		elapsed = 0
-		clear_elapsed = false
+	if not run:
+		return
+
 	update_material(self.material)
 	update_material(self.disc_two.material)
-	elapsed += delta
+	var step = 0.0166666666666667
+	elapsed += step
+	self.animation_player.advance(step)
 
 func play(precalc_data: ImageTexture) -> void:
 	self.material.set_shader_param("iPrecalcTexture", precalc_data);
-	self.clear_elapsed = true
 	self.animation_player.play("Demo")
-	self.music_player.play()
+	self.run = true
 
 func update_material(mtl: Material) -> void:
 	mtl.set_shader_param("iTime", elapsed);
