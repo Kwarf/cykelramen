@@ -7,6 +7,9 @@ I made the music in FL Studio and bought the Japanese voice samples on Fiverr.
 
 The pun on the word "Cykelramen" probably only works if you know Swedish.
 
+[![YouTube](http://i3.ytimg.com/vi/LPImI5Qw1WA/maxresdefault.jpg)](https://www.youtube.com/watch?v=LPImI5Qw1WA)
+*Click the image above to view it on YouTube.*
+
 ## Short backstory
 
 My initial intentions was to write my own framework in Rust, and I got
